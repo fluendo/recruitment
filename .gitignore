@@ -1,0 +1,7 @@
+CMakeCache.txt
+CMakeFiles
+Makefile
+moc_*
+*automoc*
+.depends
+.cxx
