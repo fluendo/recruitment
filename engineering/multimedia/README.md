@@ -17,7 +17,7 @@ The goal of this test is to quickly understand how you would fit in our team by 
 ## The rules
 
 We will provide you with a description of a new feature for the video player app, as it would be done by our Product Manager, and a list of User Stories describing its functionality.
-You will create the new application and publish your work in a public repository using a service like github or bitbucket.
+You will create the new application and publish your work in a private repository using a service like github, gitlab or bitbucket.
 As you will see, the User Stories do not have any UI design, so design it as you want since it won’t be taken in account.
 What we will value instead, is the ability to work with new API’s, your autonomy to interpret and implement User Stories, the use of good design patterns and your ability to split your work into commits and branches.
 
@@ -78,15 +78,18 @@ The Video Player project has 3 components:
   * videoplayer-qt: sample video player using the QT framework
   * videoplayer-gtk3: sample video player using the Gtk+3 framework
   * snapshot: sample application to get snapshots from a video file
-  
+
 The sources of the video player are taken from the GStreamer project examples and tutorials with the intention to provide a very basic starting point to start implementing new features for the test.
 
 ### Setup
 On a machine with a Debian-like OS, install the following packages:
 
 ```
-sudo apt-get install cmake libqt4-dev qtgstreamer-plugins libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libboost-dev libqtgstreamer-dev libgles2-mesa-dev gstreamer1.0-libav libgdk-pixbuf2.0-dev libgtk-3-dev
+sudo apt-get install cmake libqt4-dev qtgstreamer-plugins libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libboost-dev libqtgstreamer-dev tgstreamer-declarative libgles2-mesa-dev gstreamer1.0-libav libgdk-pixbuf2.0-dev libgtk-3-dev
 ```
+
+If you are doing the test using QT4 you should use Ubuntu 16.04.
+For Qt5 there are some things to fix in the setup and the build system and if you are confident enough abour your QT and CMake skills you can try to go for this option.
 
 ### Configure
 The project uses a CMake build system. To configure it enter either videoplayer-qt or videoplayer-gtk3 depending on the toolkit of your choice and configure it with:
