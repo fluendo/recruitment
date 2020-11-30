@@ -85,7 +85,7 @@ The sources of the video player are taken from the GStreamer project examples an
 On a machine with a Debian-like OS, install the following packages:
 
 ```
-sudo apt-get install cmake libqt4-dev qtgstreamer-plugins libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libboost-dev libqtgstreamer-dev tgstreamer-declarative libgles2-mesa-dev gstreamer1.0-libav libgdk-pixbuf2.0-dev libgtk-3-dev
+sudo apt-get install cmake libqt4-dev qtgstreamer-plugins libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libboost-dev libqtgstreamer-dev qtgstreamer-declarative libgles2-mesa-dev gstreamer1.0-libav libgdk-pixbuf2.0-dev libgtk-3-dev
 ```
 
 If you are doing the test using QT4 you should use Ubuntu 16.04.
