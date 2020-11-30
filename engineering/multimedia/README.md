@@ -75,24 +75,30 @@ It's time to start hacking!
 ## Video Player project
 
 The Video Player project has 3 components:
-  * videoplayer-qt: sample video player using the QT framework
+  * videoplayer-qt: sample video player using the Qt framework
   * videoplayer-gtk3: sample video player using the Gtk+3 framework
   * snapshot: sample application to get snapshots from a video file
 
 The sources of the video player are taken from the GStreamer project examples and tutorials with the intention to provide a very basic starting point to start implementing new features for the test.
 
 ### Setup
-On a machine with a Debian-like OS, install the following packages:
+
+On a Debian 10 ("Buster") machine, or a machine with a Debian-like OS, install the following packages for a working videoplayer-qtk3 development and runtime environment:
 
 ```
-sudo apt-get install cmake libqt4-dev qtgstreamer-plugins libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libboost-dev libqtgstreamer-dev qtgstreamer-declarative libgles2-mesa-dev gstreamer1.0-libav libgdk-pixbuf2.0-dev libgtk-3-dev
+sudo apt-get install cmake libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libboost-dev libgles2-mesa-dev gstreamer1.0-libav libgdk-pixbuf2.0-dev libgtk-3-dev
 ```
 
-If you are doing the test using QT4 you should use Ubuntu 16.04.
-For Qt5 there are some things to fix in the setup and the build system and if you are confident enough abour your QT and CMake skills you can try to go for this option.
+### TODO (fix up the wording in this section)
+
+If you are doing the test using Qt4 (videoplayer-qt) then you should use Ubuntu 16.04 and install appropriate dependencies.
+
+Previously specified dependencies and OS were causing build errors due to a (now-fixed) typo and incompatible build-time dependencies across "Debian-like systems".  This was further exacerbated by the application breaking after **mandatory** system-wide upgrade imposed by Ubuntu 16.04.
+
+For Qt5 there are some things to fix in the setup and the build system and if you are confident enough about your Qt and CMake skills you can try to go for this option.
 
 ### Configure
-The project uses a CMake build system. To configure it enter either videoplayer-qt or videoplayer-gtk3 depending on the toolkit of your choice and configure it with:
+The project uses a CMake build system. Configure it for
 ```
 cmake CMakeLists.txt
 ```
