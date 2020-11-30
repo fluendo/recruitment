@@ -83,17 +83,30 @@ The sources of the video player are taken from the GStreamer project examples an
 
 ### Setup
 
-On a Debian 10 ("Buster") machine, or a machine with a Debian-like OS, install the following packages for a working videoplayer-qtk3 development and runtime environment:
-
+On a Debian 10 ("Buster") machine, or a machine with a Debian-like OS, install the following packages for a working development and runtime environment.  Note that the following packages are necessary regardless of whether you intend to develop for Qt or GTK+:
 ```
-sudo apt-get install cmake libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libboost-dev libgles2-mesa-dev gstreamer1.0-libav libgdk-pixbuf2.0-dev libgtk-3-dev
+sudo apt-get install cmake libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libboost-dev libgles2-mesa-dev gstreamer1.0-libav
 ```
 
-### TODO (fix up the wording in this section)
+### Building for GTK+ 3 (recommended if you are familiar with GTK+ 3)
+
+If you are developing for videoplayer-gtk3 then additionally install the following packages:
+```
+sudo apt-get install libgdk-pixbuf2.0-dev libgtk-3-dev
+```
+
+### Building for Qt4 (easy at first, but not recommended for runtime stability)
 
 If you are doing the test using Qt4 (videoplayer-qt) then you should use Ubuntu 16.04 and install appropriate dependencies.
+```
+sudo apt-get install libqt4-dev qtgstreamer-plugins libqtgstreamer-dev qtgstreamer-declarative
+```
 
-Previously specified dependencies and OS were causing build errors due to a (now-fixed) typo and incompatible build-time dependencies across "Debian-like systems".  This was further exacerbated by the application breaking after **mandatory** system-wide upgrade imposed by Ubuntu 16.04.
+**WARNING**: Previously specified dependencies and OS were causing build errors due to the following reasons for videoplayer-qt when built against Qt4:
+1.  A (now-fixed) typo and incompatible build-time dependencies across "Debian-like systems".
+2.  The videoplayer-qt application breaks after **mandatory** system-wide upgrades imposed on the user by Ubuntu 16.04.
+
+### Building for Qt5 (recommended if you are familiar with Qt5)
 
 For Qt5 there are some things to fix in the setup and the build system and if you are confident enough about your Qt and CMake skills you can try to go for this option.
 
