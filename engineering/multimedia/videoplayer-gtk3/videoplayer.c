@@ -7,7 +7,9 @@
 #include <gdk/gdk.h>
 #include <gdk/gdkx.h>
 
-/* Structure to contain all our information, so we can pass it around */
+
+/* Structure to contain all our information, so we can pass it
+   around. */
 typedef struct _CustomData {
   GstElement *playbin;            /* Our one and only pipeline */
   GtkWidget *main_window;         /* The uppermost window, containing all other windows */
@@ -15,9 +17,12 @@ typedef struct _CustomData {
   gint64 duration;                /* Duration of the clip, in nanoseconds */
 } CustomData;
 
-/* This function is called when the GUI toolkit creates the physical window that will hold the video.
- * At this point we can retrieve its handler (which has a different meaning depending on the windowing system)
- * and pass it to GStreamer through the VideoOverlay interface. */
+
+/* This function is called when the GUI toolkit creates the physical
+ * window that will hold the video.  At this point we can retrieve its
+ * handler (which has a different meaning depending on the windowing
+ * system) and pass it to GStreamer through the VideoOverlay
+ * interface. */
 static void realize_cb (GtkWidget *widget, CustomData *data) {
   GdkWindow *window = gtk_widget_get_window (widget);
   guintptr window_handle;
@@ -26,24 +31,29 @@ static void realize_cb (GtkWidget *widget, CustomData *data) {
     g_error ("Couldn't create native window needed for GstVideoOverlay!");
 
   window_handle = GDK_WINDOW_XID (window);
-  /* Pass it to playbin, which implements VideoOverlay and will forward it to the video sink */
+  /* Pass it to playbin, which implements VideoOverlay and will
+     forward it to the video sink */
   gst_video_overlay_set_window_handle (GST_VIDEO_OVERLAY (data->playbin), window_handle);
 }
+
 
 /* This function is called when the PLAY button is clicked */
 static void play_cb (GtkButton *button, CustomData *data) {
   gst_element_set_state (data->playbin, GST_STATE_PLAYING);
 }
 
+
 /* This function is called when the PAUSE button is clicked */
 static void pause_cb (GtkButton *button, CustomData *data) {
   gst_element_set_state (data->playbin, GST_STATE_PAUSED);
 }
 
+
 /* This function is called when the STOP button is clicked */
 static void stop_cb (GtkButton *button, CustomData *data) {
   gst_element_set_state (data->playbin, GST_STATE_READY);
 }
+
 
 /* This function is called when the OPEN button is clicked */
 static void open_cb (GtkButton *button, CustomData *data) {
@@ -59,26 +69,31 @@ static void open_cb (GtkButton *button, CustomData *data) {
                                       GTK_RESPONSE_ACCEPT,
                                       NULL);
   res = gtk_dialog_run (GTK_DIALOG (dialog));
-  if (res == GTK_RESPONSE_ACCEPT)
-    {
-      char *filename;
-      GtkFileChooser *chooser = GTK_FILE_CHOOSER (dialog);
-      filename = gtk_file_chooser_get_uri (chooser);
-      /* Set the URI to play */
-      g_object_set (data->playbin, "uri", filename, NULL);
-      gst_element_set_state (data->playbin, GST_STATE_PLAYING);
-      g_free (filename);
-    }
+
+  if (res == GTK_RESPONSE_ACCEPT) {
+    char *filename;
+    GtkFileChooser *chooser = GTK_FILE_CHOOSER (dialog);
+    filename = gtk_file_chooser_get_uri (chooser);
+
+    /* Set the URI to play */
+    g_object_set (data->playbin, "uri", filename, NULL);
+    gst_element_set_state (data->playbin, GST_STATE_PLAYING);
+    g_free (filename);
+  }
+
   gtk_widget_destroy (dialog);
 }
 
-/* This function is called when the main window is closed */
+
+/* This function is called when the main window is closed. */
 static void delete_event_cb (GtkWidget *widget, GdkEvent *event, CustomData *data) {
   stop_cb (NULL, data);
   gtk_main_quit ();
 }
 
-/* This creates all the GTK+ widgets that compose our application, and registers the callbacks */
+
+/* This creates all the GTK+ widgets that compose our application, and
+   registers the callbacks. */
 static void create_ui (CustomData *data) {
   GtkWidget *video_window; /* The drawing area where the video will be shown */
   GtkWidget *main_box;     /* VBox to hold main_hbox and the controls */
@@ -122,7 +137,9 @@ static void create_ui (CustomData *data) {
   gtk_widget_show_all (data->main_window);
 }
 
-/* This function is called when an error message is posted on the bus */
+
+/* This function is called when an error message is posted on the
+   bus. */
 static void error_cb (GstBus *bus, GstMessage *msg, CustomData *data) {
   GError *err;
   gchar *debug_info;
@@ -138,15 +155,18 @@ static void error_cb (GstBus *bus, GstMessage *msg, CustomData *data) {
   gst_element_set_state (data->playbin, GST_STATE_READY);
 }
 
-/* This function is called when an End-Of-Stream message is posted on the bus.
- * We just set the pipeline to READY (which stops playback) */
+
+/* This function is called when an End-Of-Stream message is posted on
+ * the bus.  We just set the pipeline to READY (which stops
+ * playback). */
 static void eos_cb (GstBus *bus, GstMessage *msg, CustomData *data) {
   g_print ("End-Of-Stream reached.\n");
   gst_element_set_state (data->playbin, GST_STATE_READY);
 }
 
-/* This function is called when the pipeline changes states. We use it to
- * keep track of the current state. */
+
+/* This function is called when the pipeline changes states.  We use
+ * it to keep track of the current state. */
 static void state_changed_cb (GstBus *bus, GstMessage *msg, CustomData *data) {
   GstState old_state, new_state, pending_state;
   gst_message_parse_state_changed (msg, &old_state, &new_state, &pending_state);
@@ -155,6 +175,7 @@ static void state_changed_cb (GstBus *bus, GstMessage *msg, CustomData *data) {
     g_print ("State set to %s\n", gst_element_state_get_name (new_state));
   }
 }
+
 
 int main(int argc, char *argv[]) {
   CustomData data;
@@ -185,7 +206,8 @@ int main(int argc, char *argv[]) {
   /* Create the GUI */
   create_ui (&data);
 
-  /* Instruct the bus to emit signals for each received message, and connect to the interesting signals */
+  /* Instruct the bus to emit signals for each received message, and
+   * connect to the interesting signals. */
   bus = gst_element_get_bus (data.playbin);
   gst_bus_add_signal_watch (bus);
   g_signal_connect (G_OBJECT (bus), "message::error", (GCallback)error_cb, &data);
@@ -193,7 +215,8 @@ int main(int argc, char *argv[]) {
   g_signal_connect (G_OBJECT (bus), "message::state-changed", (GCallback)state_changed_cb, &data);
   gst_object_unref (bus);
 
-  /* Start the GTK main loop. We will not regain control until gtk_main_quit is called. */
+  /* Start the GTK main loop. We will not regain control until
+   * gtk_main_quit is called. */
   gtk_main ();
 
   /* Free resources */
