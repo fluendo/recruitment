@@ -125,6 +125,8 @@ static void create_ui (CustomData *data) {
   gtk_box_pack_start (GTK_BOX (controls), stop_button, FALSE, FALSE, 2);
   gtk_box_pack_start (GTK_BOX (controls), open_button, FALSE, FALSE, 2);
 
+  /* Is the main_hbox really needed or is this is a leftover appendage
+   * from the GStreamer official example documentation? */
   main_hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
   gtk_box_pack_start (GTK_BOX (main_hbox), video_window, TRUE, TRUE, 0);
 
@@ -215,7 +217,7 @@ int main(int argc, char *argv[]) {
   g_signal_connect (G_OBJECT (bus), "message::state-changed", (GCallback)state_changed_cb, &data);
   gst_object_unref (bus);
 
-  /* Start the GTK main loop. We will not regain control until
+  /* Start the GTK main loop.  We will not regain control until
    * gtk_main_quit is called. */
   gtk_main ();
 
