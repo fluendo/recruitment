@@ -15,6 +15,7 @@ typedef struct _CustomData {
   GtkWidget *main_window;         /* The uppermost window, containing all other windows */
   GstState state;                 /* Current state of the pipeline */
   gint64 duration;                /* Duration of the clip, in nanoseconds */
+  GtkWidget *duration_disp;        /* Widget showing total duration */
 } CustomData;
 
 
@@ -32,7 +33,7 @@ static void realize_cb (GtkWidget *widget, CustomData *data) {
 
   window_handle = GDK_WINDOW_XID (window);
   /* Pass it to playbin, which implements VideoOverlay and will
-     forward it to the video sink */
+   * forward it to the video sink */
   gst_video_overlay_set_window_handle (GST_VIDEO_OVERLAY (data->playbin), window_handle);
 }
 
@@ -93,13 +94,15 @@ static void delete_event_cb (GtkWidget *widget, GdkEvent *event, CustomData *dat
 
 
 /* This creates all the GTK+ widgets that compose our application, and
-   registers the callbacks. */
+ * registers the callbacks. */
 static void create_ui (CustomData *data) {
   GtkWidget *video_window; /* The drawing area where the video will be shown */
   GtkWidget *main_box;     /* VBox to hold main_hbox and the controls */
   GtkWidget *main_hbox;    /* HBox to hold the video_window and the stream info text widget */
-  GtkWidget *controls;     /* HBox to hold the buttons and the slider */
+  GtkWidget *controls;     /* HBox to hold the buttons, time and duration, and the slider */
   GtkWidget *play_button, *pause_button, *stop_button, *open_button; /* Buttons */
+  GtkWidget *duration_disp;     /* Display duration widget */
+  GtkTextBuffer *duration_text; /* Text to print in duration display, presently empty */
 
   data->main_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
   g_signal_connect (G_OBJECT (data->main_window), "delete-event", G_CALLBACK (delete_event_cb), data);
@@ -125,6 +128,12 @@ static void create_ui (CustomData *data) {
   gtk_box_pack_start (GTK_BOX (controls), stop_button, FALSE, FALSE, 2);
   gtk_box_pack_start (GTK_BOX (controls), open_button, FALSE, FALSE, 2);
 
+  data->duration_disp = gtk_text_view_new ();
+  gtk_text_view_set_editable (GTK_TEXT_VIEW (data->duration_disp), FALSE);
+  gtk_box_pack_start (GTK_BOX (controls), data->duration_disp, TRUE, TRUE, 2);
+  duration_text = gtk_text_view_get_buffer (GTK_TEXT_VIEW (data->duration_disp));
+  gtk_text_buffer_set_text (duration_text, "", -1);
+
   /* Is the main_hbox really needed or is this is a leftover appendage
    * from the GStreamer official example documentation? */
   main_hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
@@ -141,7 +150,7 @@ static void create_ui (CustomData *data) {
 
 
 /* This function is called when an error message is posted on the
-   bus. */
+ * bus. */
 static void error_cb (GstBus *bus, GstMessage *msg, CustomData *data) {
   GError *err;
   gchar *debug_info;
@@ -167,6 +176,30 @@ static void eos_cb (GstBus *bus, GstMessage *msg, CustomData *data) {
 }
 
 
+/* This function is called periodically to refresh the GUI */
+static gboolean refresh_ui (CustomData *data) {
+  gint64 current = -1;
+  GtkTextBuffer *duration_text;
+  gchar *total_str;
+
+  /* We do not want to update anything unless we are in the PAUSED or PLAYING states */
+  if (data->state < GST_STATE_PAUSED)
+    return TRUE;
+
+  /* If we didn't know it yet, query the stream duration */
+  if (!GST_CLOCK_TIME_IS_VALID (data->duration)) {
+    if (!gst_element_query_duration (data->playbin, GST_FORMAT_TIME, &data->duration)) {
+      g_printerr ("Could not query current duration.\n");
+    } else {
+      duration_text = gtk_text_view_get_buffer (GTK_TEXT_VIEW (data->duration_disp));
+      total_str = g_strdup_printf ("Duration: %" GST_TIME_FORMAT,
+          GST_TIME_ARGS (data->duration));
+      gtk_text_buffer_insert_at_cursor (duration_text, total_str, -1);
+      g_free (total_str);
+    }
+  }
+}
+
 /* This function is called when the pipeline changes states.  We use
  * it to keep track of the current state. */
 static void state_changed_cb (GstBus *bus, GstMessage *msg, CustomData *data) {
@@ -175,6 +208,10 @@ static void state_changed_cb (GstBus *bus, GstMessage *msg, CustomData *data) {
   if (GST_MESSAGE_SRC (msg) == GST_OBJECT (data->playbin)) {
     data->state = new_state;
     g_print ("State set to %s\n", gst_element_state_get_name (new_state));
+  }
+  if (old_state == GST_STATE_READY && new_state == GST_STATE_PAUSED) {
+    /* For extra responsiveness, we refresh the GUI as soon as we reach the PAUSED state */
+    refresh_ui (data);
   }
 }
 
