@@ -33,8 +33,8 @@ In 2020 when AI was doing its first steps on professional sports, the following 
 
 ### Questions:
 
-Please provide a document (and extra data if any) answering each question below.
+Please provide a document (and extra data if any) answering each question below; please note that no practical exercises are required here (just theoretical analysis) but feel free to add any.
 
-1. What do you think it occurred during this model development (trainning & evaluation)?
+1. What do you think it occurred during this model development (trainning & evaluation)? 
 2. How would you fix this behavior? Please provide at least 2 options explaining their pros and drawbacks
 3. Extra: Do you know any tracking algos (Deep learning based) that could be used here?
