@@ -1,4 +1,4 @@
-# Research Engineer Test
+# Business developer
 
 ## What is this test about?
 If you are reading this document, then you are in the process of becoming a new member of our team. Like any other company, at Fluendo we are looking for the best talent to join our team, but it’s always hard to do so just by reading a CV or in a 1-hour Q&A interview.
