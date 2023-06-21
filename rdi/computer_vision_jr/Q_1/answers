@@ -3,3 +3,14 @@ data as it may lack diversity or not be adapted to different scenarios (for exam
 of the pitch and since the "linesman's head" has always grass in the neighborhood this explains the biased training data).
 For the evaluation of the model, it feels legitimate  to say that the model was unable to generalize because the model was so true to the training data that didn't have 
 diverse scenarios which have made it difficult to deal with challenges like occlusion, change of scale and lightning, background...
+
+
+2-As a first solution, I choose to act on the training data: make it more diverse, include different scenarios, and make sure that the background is not uniform (not 
+just green grass) for the sake of avoiding overfitting and learning how to deal with challenging scenarios like occlusion and change of motion. A negative point about
+this may be computational cost and slowing down the training.
+
+As a second solution, I suggest improving annotations, relying for example on automatic methods to do annotation and reduce human error, making use of generative models like diffusion models
+to generate fully annotated data, and enriching the dataset with reliable annotations. The drawback may be also about computation resources and how to adapt these generative
+models(hyperparameters) to this specific type of problem.
+
+
