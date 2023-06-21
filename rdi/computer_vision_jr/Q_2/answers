@@ -1,5 +1,5 @@
-1-In order to achieve player action recognition, we can use an object detection algorithm like YOLO to locate the players inside the pitch and draw banding
-boxes around them.
+1-In order to achieve player action recognition, we can use an object detection algorithm like YOLO to locate the players inside the pitch and draw bounding boxes
+around them.
 We can also apply some classification algorithms like Random Forest or SVM that are able to extract color and texture features in order to properly distinguish between 
 players from different teams, referees, and coaches.
 
@@ -8,6 +8,6 @@ players from different teams, referees, and coaches.
 teams because they occlude each other. Another problem is it might be tricky to correctly identify the pose and do the right classification of the action of the player.
 
 
-3-Yes, this can be scaled to other team-based sports like Rugby and Basketball because object detection and classification are needed to recognize players action 
-yet, every sport has its technical specifications as well as unique costumes and appearances which may be tricky if we do not adapt the model made from the football action 
-recognition model.
+3-Yes, this can be scaled to other team-based sports like Rugby and Basketball because object detection and classification are needed to recognize players' action 
+yet, every sport has its technical specifications as well as unique costumes and appearances which may be tricky if we do not adapt the model made from the football 
+action recognition model.
