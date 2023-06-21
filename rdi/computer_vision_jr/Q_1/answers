@@ -13,7 +13,7 @@ As a second solution, I suggest improving annotations, relying for example on au
 to generate fully annotated data, and enriching the dataset with reliable annotations. The drawback may be also about computation resources and how to adapt these generative
 models(hyperparameters) to this specific type of problem.
 
-3-As a deep learning tracking algorithm suitable for this case of single object tracking may be using graph based tracker, graphs are very efficient in capturing spatial
-information by using multiple CNNs .
+3-A deep learning tracking algorithm suitable for this case of single object tracking is graph based tracker, graphs are very efficient in capturing spatial
+information by using multiple CNNs.
 
 
