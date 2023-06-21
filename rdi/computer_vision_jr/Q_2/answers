@@ -1,1 +1,8 @@
+1-In order to achieve player action recognition, we can use an object detection algorithm like YOLO to locate the players inside the pitch and draw banding
+boxes around them.
+We can also apply some classification algorithms like Random Forest or SVM that are able to extract color and texture features in order to properly distinguish between 
+players from different teams, referees, and coaches.
 
+
+2-Some potential bottlenecks may this problem encounter is for example occlusion where the model can be confused to distinguish between two players from different
+teams because they occlude each other. Another problem is it might be tricky to correctly identify the pose and do the right classification of the action of the player.
