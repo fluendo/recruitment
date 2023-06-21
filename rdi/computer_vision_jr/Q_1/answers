@@ -1,5 +1,5 @@
-1-I believe the main problem that could explain the confusion of the bald linesman's head for the boll is overfitting, in fact, this can be due to the quality of the training 
+1-I believe the main problem that could explain the confusion of the bald linesman's head for the ball is overfitting, in fact, this can be due to the quality of the training 
 data as it may lack diversity or not be adapted to different scenarios (for example the case when the ball is in the air and the background is not green grass, or when it gets out
 of the pitch and since the "linesman's head" has always grass in the neighborhood this explains the biased training data).
-For the evaluation of the model, it feels legitimate  to say that the model was unable to generalize because the model was so stick to the training data that didn't have 
-diverse scenarios which has made it difficult to deal with challenges like occlusion, change of scale and lightning ,background...
+For the evaluation of the model, it feels legitimate  to say that the model was unable to generalize because the model was so true to the training data that didn't have 
+diverse scenarios which have made it difficult to deal with challenges like occlusion, change of scale and lightning, background...
