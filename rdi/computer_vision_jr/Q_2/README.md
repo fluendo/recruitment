@@ -47,21 +47,25 @@ Please provide a document (and extra data if any) answering each question below.
 
 1. Which algorithms would you use to achieve this? Please provide at least 2 proposals
 
-The first approach could be using HoG descriptors to detect people in the image and then use the colour information inside the region, with some filters, to make the classification. This approach needs to adjust the filters according to the colours of the team/referee.
+The first approach could be using HoG descriptors to detect people in the image and then use the colour information inside the region, with some filters, to make the classification. This approach needs to adjust the filters according to the colours of the team/referee. One 
 
-Another approach that relies less on human intervention could be approach is to use [YOLO](https://github.com/ultralytics/yolov5). This could be used to detect and classify people according to their cloths. However, particular attention should be paid to the cases where the teams/referees use very similar colors. 
+Another approach that relies less on human intervention could be [YOLO](https://github.com/ultralytics/yolov5). It could be trained to detect and classify people according to their cloths. However, particular attention should be paid to the cases where the teams/referees use very similar colors. 
+
 
 2. Which potential bottlenecks may this problem encounter? (i.e. non-static camera). Just list them (if any)
 
-In this case, weather/lighting conditions can affect the classification.
+* In this case, weather/lighting conditions can affect the classification.
 
-Another problem may be people overlapping, which can cause a mis-classification.
+* Another problem may be people overlapping, which can cause a mis-classification.
+
+* Finally, similar clothes between the different teams.
+
 
 3. Could your proposals be scaled to other team-based sports? (i.e. hockey, rugby, ...) Which would be worst-case scenarios?
 
 There should be no problem for the cases where the teams have some color distinction. For the case of the handcrafted method, maybe the descriptors should adapt more to the new common people poses. 
 
-The worst case would be near identical cloths with very small differences, in which the system will struggle to make the classification.
+The worst case would be near identical cloths with very close players, in which the system will struggle to make the classification.
 
 3. Extra: provide a sample code with some proposal running
 
@@ -101,7 +105,7 @@ There was a problem with the `protobuf` version, it had to be changed in the req
 ![ref](roboflow.png)
 
 
-* Export the dataset in YOLOv8 format. The resulting dataset from this test can be found [here](https://universe.roboflow.com/izan-leal-garcia/football-detector-mimk2/dataset/1). 
+* Export the dataset in YOLOv8 format, and save it to the `ultralytics/datasets/` folder. The resulting dataset from this test can be found [here](https://universe.roboflow.com/izan-leal-garcia/football-detector-mimk2/dataset/1). 
 
 
 * Re-train the model with the new dataset, using the previous YOLOv8 COCO weights for model initialization, with the `classifier.py` file. New weights are saved in the `runs/detect/trainX/weights/` folder.
