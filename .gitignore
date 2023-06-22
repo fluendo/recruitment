@@ -5,3 +5,5 @@ moc_*
 *automoc*
 .depends
 .cxx
+venv/
+**/.idea/

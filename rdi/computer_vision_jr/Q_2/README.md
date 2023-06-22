@@ -64,3 +64,48 @@ There should be no problem for the cases where the teams have some color distinc
 The worst case would be near identical cloths with very small differences, in which the system will struggle to make the classification.
 
 3. Extra: provide a sample code with some proposal running
+
+The system classificator has been implemented with [YOLOv8](https://github.com/ultralytics/ultralytics/tree/main)
+
+The [video](https://www.pexels.com/video/people-playing-soccer-6077729/) has been downloaded from `https://www.pexels.com/search/videos/football/`
+
+The steps to train and evaluate the classificator are:
+* Install the requirements from the ultralytics folder
+
+`pip install pip install -r ultraytics/requirements.txt`. 
+
+There was a problem with the `protobuf` version, it had to be changed in the requirements file to `protobuf==3.20.0`.
+
+
+* Extract the frames from the video using the `video_parse.py` file.
+![ref](im92.jpg)
+
+
+* Generate the people labels by predicting with YOLOv8 COCO weights, using the `auto_labeler.py` file. There are several model available:
+
+| Model                                                                                       | size<br><sup>(pixels) | params<br><sup>(M) |
+| ------------------------------------------------------------------------------------------- | --------------------- |----------------|
+| YOLOv8n | 640                   | 3.2            |
+| YOLOv8s | 640                   | 11.2           |
+| YOLOv8m | 640                   | 25.9           |
+| YOLOv8l | 640                   | 43.7           |
+| YOLOv8x | 640                   | 68.2           |
+
+(The system will download automatically any of them if selected)
+
+
+* Upload the images and labels to [Roboflow](https://roboflow.com/). This step can also be done by adjusting the labels manually in the .txt files, but it is more time-consuming.
+
+
+* Adjust the classes, by adding the teams labels and the other needed labels.
+![ref](roboflow.png)
+
+
+* Export the dataset in YOLOv8 format. The resulting dataset from this test can be found [here](https://universe.roboflow.com/izan-leal-garcia/football-detector-mimk2/dataset/1). 
+
+
+* Re-train the model with the new dataset, using the previous YOLOv8 COCO weights for model initialization, with the `classifier.py` file. New weights are saved in the `runs/detect/trainX/weights/` folder.
+
+
+* Use the new trained weights to make a prediction with the `classifier.py` file. 
+![ref](pred_im92.jpg)
