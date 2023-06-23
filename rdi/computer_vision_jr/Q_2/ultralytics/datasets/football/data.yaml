@@ -1,0 +1,13 @@
+train: ../train/images
+val: ../valid/images
+test: ../test/images
+
+nc: 4
+names: ['other', 'team1', 'team1gk', 'team2']
+
+roboflow:
+  workspace: izan-leal-garcia
+  project: football-detector-mimk2
+  version: 1
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/izan-leal-garcia/football-detector-mimk2/dataset/1
