@@ -29,10 +29,10 @@ The success of this approach relies on having a diverse and well-annotated train
 
 Deep learning-based tracking algorithms could be potentially used to address the tracking issue in this scenario.
 
-Deep SORT (Deep Simple Online and Realtime Tracking) is a deep learning-based tracking algorithm that combines a deep feature extractor, utilizing convolutional neural networks, with the SORT algorithm. It incorporates a deep feature embedding network to encode appearance information and a Kalman filter-based tracking framework to handle the temporal dynamics of the tracked objects. Deep SORT has shown promising results in multi-object tracking scenarios and can be adapted to track the ball. [1](https://www.intechopen.com/chapters/75342)
+Deep SORT (Deep Simple Online and Realtime Tracking) is a deep learning-based tracking algorithm that combines a deep feature extractor, utilizing convolutional neural networks, with the SORT algorithm. It incorporates a deep feature embedding network to encode appearance information and a Kalman filter-based tracking framework to handle the temporal dynamics of the tracked objects. Deep SORT has shown promising results in multi-object tracking scenarios and can be adapted to track the ball. [[1](https://www.intechopen.com/chapters/75342)]
 
 Additionally, CenterTrack is also a tracking algorithm that introduces an object detection network followed by an online tracking algorithm. The key idea behind CenterTrack is to estimate an object's center point and associate it with the corresponding object across frames. By using the center points, CenterTrack aims to address the challenges of occlusion, scale variation, and object interactions that often occur in crowded scenes.
 
-Another state-of-the-art tracking algorithm that can be proposed is TrackNet, a deep learning network for tracking high-speed and small objects in sports applications, that could be a suitable choice for accurate ball tracking, as it is trained to recognize the ball from a single frame but also learn patterns from consecutive frames. 
+Another state-of-the-art tracking algorithm that can be proposed is TrackNet, a deep learning network for tracking high-speed and small objects in sports applications, that could be a suitable choice for accurate ball tracking, as it is trained to recognize the ball from a single frame but also learn patterns from consecutive frames. [[2](https://arxiv.org/abs/1907.03698)]
 
-https://arxiv.org/abs/1907.03698
+
