@@ -1,4 +1,6 @@
-1. 
+# Question 1
+
+## 1. What do you think occurred during this model development (training & evaluation)?
 
 In the incident you described, where the system intended to follow a soccer ball but got confused and started following a bald linesman instead, there are several possible factors that could have contributed to this error during the model development, training, and evaluation process.
 
@@ -9,7 +11,8 @@ The training data used to train the model might have been biased and lacked suff
 Additionally, the evaluation process plays an important role in assessing the model's performance and identifying potential shortcomings. The evaluation primarily focused on tracking the ball and did not thoroughly consider edge cases, so the issue of the model mistakenly following the linesman might have been overlooked. If the evaluation metrics only measured the model's accuracy in tracking the ball and did not include scenarios specifically designed to test its ability to ignore similar-looking instances, the problem of tracking the linesman, and the fact that the model was not able to generalize, would not have been discovered until it occurred during a live match.
 
 
-2. 
+## 2. How would you fix this behavior? Please provide at least 2 options explaining their pros and drawbacks
+
 To fix the behavior there are several potential options.
 
 The first option can focus on enhancing the training data and retraining the model. Making a more diverse dataset, including more difficult scenarios, with different camera viewpoints and perspectives, lighting conditions and including occlusions, can help the model to learn to differentiate between  similar objects more effectively and avoid overfitting. 
@@ -22,13 +25,11 @@ Implementing multi-object tracking and attention mechanisms adds complexity to t
 The success of this approach relies on having a diverse and well-annotated training dataset that encompasses various scenarios involving the ball, players, and linesmen. Acquiring such a dataset can be challenging and time-consuming.
 
 
-3.
+## 3. Extra: Do you know any tracking algos (Deep learning based) that could be used here?
 
 Deep learning-based tracking algorithms could be potentially used to address the tracking issue in this scenario.
 
-Deep SORT (Deep Simple Online and Realtime Tracking) is a deep learning-based tracking algorithm that combines a deep feature extractor, utilizing convolutional neural networks, with the SORT algorithm. It incorporates a deep feature embedding network to encode appearance information and a Kalman filter-based tracking framework to handle the temporal dynamics of the tracked objects. Deep SORT has shown promising results in multi-object tracking scenarios and can be adapted to track the ball. 
-
-https://www.intechopen.com/chapters/75342
+Deep SORT (Deep Simple Online and Realtime Tracking) is a deep learning-based tracking algorithm that combines a deep feature extractor, utilizing convolutional neural networks, with the SORT algorithm. It incorporates a deep feature embedding network to encode appearance information and a Kalman filter-based tracking framework to handle the temporal dynamics of the tracked objects. Deep SORT has shown promising results in multi-object tracking scenarios and can be adapted to track the ball. [1](https://www.intechopen.com/chapters/75342)
 
 Additionally, CenterTrack is also a tracking algorithm that introduces an object detection network followed by an online tracking algorithm. The key idea behind CenterTrack is to estimate an object's center point and associate it with the corresponding object across frames. By using the center points, CenterTrack aims to address the challenges of occlusion, scale variation, and object interactions that often occur in crowded scenes.
 
