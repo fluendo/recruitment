@@ -1,4 +1,6 @@
-1.
+# Question 2
+
+## 1. Which algorithms would you use to achieve this? Please provide at least 2 proposals
 
 To achieve accurate team detection and classification, we can consider both traditional and modern deep learning techniques. Although deep learning approaches have proven their superiority in similar problems, it is also interesting to find out how a traditional computer vision approach performs in a situation like this.
 
@@ -8,7 +10,7 @@ For a deep learning approach, Convolutional Neural Networks (CNNs) are highly ef
 
 In this case, we can use YOLO, a real-time object detection algorithm that directly predicts bounding boxes and class probabilities in a single pass through the network. It’s a one stage object detector that divides the input image into a grid and applies convolutional layers to simultaneously predict bounding boxes and their associated class probabilities. YOLO can be trained on a dataset with labeled images of players from different teams, detect and classify players in real-time. The speed and efficiency of YOLO makes it suitable for real-time applications like sports.
 
-2.
+# 2. Which potential bottlenecks may this problem encounter? (i.e. non-static camera). Just list them (if any)
 
 When dealing with team detection and classification non-static cameras can introduce motion blur and distortions affecting the quality of the captured images, making it challenging to accurately detect players. Depending on the cameras and the distance from the field, the scale and perspective of players can vary significantly, affecting the accuracy of the prediction and introducing challenges in feature extraction.
 
@@ -18,7 +20,7 @@ Changes in lighting and weather conditions, or day and night games, can affect t
 
 It is also important to collect a diverse and representative dataset of players. This can be an extremely time-consuming process, however insufficient training data or an imbalanced dataset may result in reduced performance and difficulties in accurately classifying players.
 
-3.
+# 3. Could your proposals be scaled to other team-based sports? (i.e. hockey, rugby, ...) Which would be worst-case scenarios?
 
 The proposals mentioned can be scaled to other team-based sports such as hockey, rugby, basketball, or any other sport where team detection and classification are required and can serve as a starting point for training models in other sports. Due to the variations and challenges specific to each sport, the general principles can be adapted and applied. Depending on the sport, the challenges involve higher levels of occlusion, rapid motion, specific  lighting conditions, and complex backgrounds. 
 
@@ -27,7 +29,7 @@ To apply and scale these proposals to other sports, we would need to include an 
 Additionally, fine-tuning and retraining the models with new data would be necessary. This process involves adjusting the input data, class labels, and potentially modifying the architecture or parameters of the models to better suit the characteristics of the target sport.
 
 
-4. 
+# 4. Extra: provide a sample code with some proposal running
 
 To tackle the problem of player detection and classification in football I considered 2 approaches.
 
