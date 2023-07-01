@@ -52,6 +52,7 @@ For a more novel approach, in order to fix this issue we could implement multi-t
 
 #### 3. Extra: Do you know any tracking algos (Deep learning based) that could be used here?
 From the top of my head, I can only recall YOLOv7 and SORT, which might be useful for this problem.  
+![image](https://github.com/yibeisita/recruitment/assets/74725809/b4ba7ee0-3913-4c5b-8484-0fa0c2ee8fa2)
 
 
 #### References
