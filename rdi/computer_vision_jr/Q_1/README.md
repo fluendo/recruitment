@@ -30,18 +30,12 @@ In 2020 when AI was doing its first steps on professional sports, the following 
 - System was being built with a Deep Learning based model (not traditional computer vision methods) 
 
 
-
 ### Questions:
 
 Please provide a document (and extra data if any) answering each question below; please note that no practical exercises are required here (just theoretical analysis) but feel free to add any.
 
-#### Note: 
-Many computer vision techniques use Deep Learning so I am not sure what the assumption means with deep learning based methods since popular object detection algorithms like YOLO or R-CNN are deep learning. So in order to answer the questions I am going to make the assumption that deep learning refers to more traditional machine learning approaches. 
-
 #### 1. What do you think occurred during this model development (training & evaluation)? 
-Without any previous research apart from the links provided and the assumption that the model was not built using traditional computer vision methods rather than deep learning, I assume that the goal of the model was object recognition (detection) which entails 2 main tasks, image classification, and object localization. 
-
-The model experienced confusion due to the visual similarities between the linesman and the ball, such as their shared color or shape, which might have labeled the bald linesman with higher accuracy than the ball for the correct class, especially when the view was obscured by players or shadows. This happened most likely due to not enough diversity in the dataset that resembled bald people.
+Without any previous research apart from the links provided and the assumption that the model was not built using traditional computer vision methods rather than deep learning, I assume that the goal of the model was object recognition (detection) which entails 2 main tasks, image classification, and object localization. The model experienced confusion due to the visual similarities between the linesman and the ball, such as their shared color or shape, which might have labeled the bald linesman with higher accuracy than the ball for the correct class, especially when the view was obscured by players or shadows. This happened most likely due to not enough diversity in the dataset that resembled bald people.
 
 #### 2. How would you fix this behavior? Please provide at least 2 options explaining their pros and drawbacks
 This error is what Chanda et. al call a "Logic in AI focused on the non-salient part of input information" where the AI system is provided all the information it needs and yet it makes a judgment based on the less-salient part of the information it receives [1]. In our case, the reason for misjudgment was the presence of a non-salient pattern resembling the pattern of interest. 
