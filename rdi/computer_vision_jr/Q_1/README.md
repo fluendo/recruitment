@@ -51,6 +51,7 @@ From the top of my head, I can only recall YOLOv7 and SORT, which might be usefu
 
 #### References
 [1] Chanda, S.S., Banerjee, D.N. Omission and commission errors underlying AI failures. AI & Soc (2022). https://doi.org/10.1007/s00146-022-01585-x
+
 [2] J. -Y. Kim and T. -Y. Kim. Soccer Ball Tracking Using Dynamic Kalman Filter with Velocity Control (2009). Sixth International Conference on Computer Graphics, Imaging and Visualization, Tianjin, China, 2009, pp. 367-374, doi: 10.1109/CGIV.2009.87.
 
 
