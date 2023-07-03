@@ -36,7 +36,7 @@ Sí, pero con algunas limitaciones:
 
 Por tiempo, complejidad y por falta de dataset he optado por hacer la propuesta con métodos tradicionales. He hecho una substracción del background y filtro por colores, también quise hacer un filtrado por tamaño, pero me di cuenta de que el video que utilice no era el más adecuado para eso debido a los diferentes cambios de cámara. También intenté hacer con HOG's, pero me iba muy lento, así que decidí no utilizarlos.
 
-He de decir que obviamente un CNN bien entrenado haría un mejor trabajo, pero que no estoy para nada insatisfecho con el trabajo que he conseguido con métodos tradicionales hechos.
+He de decir que me hubiera gustado hacerlo con un CNN bien entrenado ya que haría un mejor trabajo, pero que no estoy para nada descontento con el trabajo que he conseguido con métodos tradicionales.
 
 
 ![ref](resultado.jpg)
