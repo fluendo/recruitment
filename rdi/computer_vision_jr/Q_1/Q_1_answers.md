@@ -1,10 +1,10 @@
 # 1. What do you think it occurred during this model development (training & evaluation)? 
 
-One of the issues could involve the training phase and the dataset used. The model was probably trained to identify and track the football using as reference the color, shape and its movement. On the articles we can see the model confuse the bald linesman's head with the characteristics that it learnt to recognize on the football, since these do share similarities (color, shape).
+One of the issues could involve the training phase and the dataset used. The model was probably trained to identify and track the ball using as reference the color, shape and its movement. On the articles we can see the model confuse the bald linesman's head with the characteristics that it learnt to recognize on the ball, since they share similarities (color, shape).
 
 Another issue could be on the evaluation phase where the model's performance may not have been thoroughly tested in different scenarios, like having a bald linesman. 
 
-And a last problem could be the quality of data on the training and evaluation datasets, these not having enough relevant data for the model to learn how to differenciate objects with similar characteristics.
+And lastly, it could be the quality of data on the training and evaluation datasets not having enough relevant data for the model to learn how to differenciate similar objects.
 
 # 2. How would you fix this behavior? Please provide at least 2 options explaining their pros and drawbacks
 
