@@ -8,8 +8,8 @@
 In 2024, several UK drivers were wrongly fined up to £105 for failing to pay the Dartford Crossing toll, despite never having used the crossing. The issue stemmed from ANPR cameras misreading vehicle licence plates, leading to incorrect penalty charge notices being issued. For instance, one driver received fines for vehicles with plates differing by a single character from her own, and another was fined for a vehicle of a similar make and color but with a slightly different registration number.
 
 <div style="text-align: center;">
-  <img src="./plates.png" alt="Plate 1" width="20%" style="display: inline-block; margin-right: 2%;">
-  <img src="./ocr_plates.png" alt="Plate 2" width="20%" style="display: inline-block;">
+  <img src="../imagery/plates.png" alt="Plate 1" width="20%" style="display: inline-block; margin-right: 2%;">
+  <img src="../imagery/ocr_plates.png" alt="Plate 2" width="20%" style="display: inline-block;">
 </div>
 
 
