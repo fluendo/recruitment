@@ -11,7 +11,7 @@ If you are reading this document, then you are in the process of becoming a new 
 
 
 
-The goal of this test is to understand how you would fit in our Research, Development and Innovation team as a Computer Vision engineer through a set of **fast** tasks (mini-tests) which will introduce you to our team's scope and will let us know more about you.
+The goal of this test is to understand how you would fit in Artificial Intelligence team as an Artificial Intelligence intern through a set of **fast** tasks (mini-tests) which will introduce you to our team's scope and will let us know more about you.
 
 
 
