@@ -1,4 +1,4 @@
-# RDI Tech Assessment: Artificial Intelligence Intern
+# AI Tech Assessment: Artificial Intelligence Intern
 
 
 ## What is this test about?
