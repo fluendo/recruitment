@@ -27,7 +27,7 @@ Each mini-test has been designed to evaluate some specific skills so you may fin
 2. Take your time to fill the test
 3. (If any) extra document is created/needed, feel free to add them to your fork
 4. Once test is finished, launch PR to Fluendo's repo and notify us via email
-5. After internal review, you will be prompted to perform a technical review with some RDI's team members
+5. After internal review, you will be prompted to perform a technical review with some team members
 
 
 
