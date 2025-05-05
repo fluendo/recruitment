@@ -1,4 +1,4 @@
-# RDI Tech Assessment: Computer Vision Engineer
+# RDI Tech Assessment: Artificial Intelligence Intern Engineer
 
 
 ## What is this test about?
