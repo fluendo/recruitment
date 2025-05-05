@@ -1,4 +1,4 @@
-# RDI Tech Assessment: Artificial Intelligence Intern Engineer
+# RDI Tech Assessment: Artificial Intelligence Intern
 
 
 ## What is this test about?
@@ -10,9 +10,7 @@ If you are reading this document, then you are in the process of becoming a new 
 </p>
 
 
-
 The goal of this test is to understand how you would fit in Artificial Intelligence team as an Artificial Intelligence intern through a set of **fast** tasks (mini-tests) which will introduce you to our team's scope and will let us know more about you.
-
 
 
 ## How to proceed?
@@ -30,7 +28,6 @@ Each mini-test has been designed to evaluate some specific skills so you may fin
 5. After internal review, you will be prompted to perform a technical review with some team members
 
 
-
 ## What do we evaluate?
 
 In Fluendo we look for the best members to join our team so we do not only focus on technical abilities but also on your analytical thinking, personality, team-work predisposal, ... See below a list of our evaluation guidelines:
@@ -41,7 +38,6 @@ In Fluendo we look for the best members to join our team so we do not only focus
 4. Communication skills
 5. Timing and organization methodology
 6. Coding style
-
 
 
 ## Rules:
