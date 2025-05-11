@@ -46,18 +46,14 @@ A misclassification in such a case could be due to several reasons:
 
 #### 3. **What do you think will occur when running this AI in a different country with different plate formats? How would you ensure system accuracy?**
 
-If the training dataset includes only local plates (e.g., UK), the model may not generalize well to plates from other countries due to different formats and styles. The system may fail because it's overfitted to the training distribution.
-
-**Solutions**:
-
-* Retrain or fine-tune the model using local data from the new country.
-* Employ a region-specific model or use transfer learning to adapt the base model to new plate formats.
+If the training dataset only includes license plates from a specific country, such as Spain, the model will likely perform poorly when applied in another country with a different plate format. This is because the model would be overfitted to the characteristics of the original dataset and unable to generalize to new formats, fonts, or layouts. 
+To ensure system accuracy in this scenario, I would consider retraining the model with images from the new country or applying transfer learning to adapt the existing model using a smaller, localized dataset. Another viable approach is to maintain country-specific models, each fine-tuned on local data, which ensures the model performs well under regional standards while still benefiting from the base model’s learned features.
 
 
 #### 4. **Do you know any OCR (Optical Character Recognition) algorithms (deep learning based) that could be used here?**
 
 I haven’t studied deep learning-based OCR models in depth. However, I understand OCR as a classification task where the input is an image of a character and the output is the corresponding label.
-I also see parallels with voice recognition, which also involves sequential or structured data. In that context, I studied architectures like CNNs, RNNs, and Transformers—relevant ideas for OCR too.
+I also see parallels with voice recognition, which also involves sequential or structured data. In that context, I studied architectures like CNNs, RNNs, and Transformers, which are relevant ideas for OCR too.
 
 #### 5. **Explain a Computer Vision / Artificial Intelligence project in which you have participated (goals, your role, difficulties you found, how they were solved, ...)**
 
@@ -67,7 +63,7 @@ Besides the projects listed in my CV, here are some academic projects I worked o
 This was an individual project completed for the final assignment in a Computer Vision course. The dataset consisted of images of the same type of plant, and the goal was to analyze visual attributes such as color and area to assess their condition. I used traditional computer vision techniques like segmentation, morphological operations (open/close), and color histograms, mainly with MATLAB’s Computer Vision Toolbox. One of the main difficulties was segmenting the plants accurately, as lighting conditions and backgrounds varied across images. I solved this by experimenting with different thresholding strategies and applying open/close operators to refine the segmented regions and recover essential plant details.
 
 * **Character Recognition of Book Titles:**
-In this project, the dataset contained images of book covers along with separate images for each of the 26 alphabetic characters. The objective was to recognize the title text on each book cover. My approach began with image segmentation to isolate each character as an independent connected component. Then, I applied skeletonization and extracted features such as chain code, number of lines, and number of circles, which were then compared to the reference dataset. This was also part of the final Computer Vision project. The main challenge was identifying efficient and meaningful features to describe the characters, which I addressed through iterative testing and refinement.
+In this project, the dataset contained images of book covers along with separate images for each of the 26 alphabetic characters. The objective was to recognize the title text on each book cover. My approach began with image segmentation to isolate each character as an independent connected component. Then, I applied skeletonization and extracted features such as chain code, number of lines, number of circles..., which were then compared to the reference dataset (characters). This was also part of the final Computer Vision project. The main challenge was identifying efficient and meaningful features to describe the characters, which I addressed through iterative testing and refinement.
 
 * **Transfer Learning with YOLOv8:**
-This project followed the Transfer Learning workflow described in the GitHub repository Pretrained YOLOv8 Network for Object Detection. I used the Indoor Object Detection Dataset to fine-tune the model. Even though the dataset was relatively small, training the network for just 10 epochs yielded promising results, with a mean Average Precision (mAP) close to 0.8. This experience showed me how effective transfer learning can be in scenarios where data is limited, and how pretrained models can drastically reduce training time while maintaining high performance.
+This project followed the Transfer Learning workflow described in [GitHub - Pretrained YOLOv8 Network For Object Detection.](https://github.com/matlab-deep-learning/Pretrained-YOLOv8-Network-For-Object-Detection?tab=readme-ov-file). I used the [Indoor Object Detection Dataset.](https://zenodo.org/record/2654485/files/Indoor%20Object%20Detection%20Dataset.zip?download=1) to fine-tune the model. Even though the dataset was small, training the network for just 10 epochs yielded promising results, with a mean Average Precision (mAP) close to 0.8. This experience showed me how effective transfer learning can be in scenarios where data is limited, and how pretrained models can drastically reduce training time while maintaining high performance.
