@@ -28,3 +28,5 @@ My main project in AI has been my end-of-degree project. In this project, I lear
 I have worked on some smaller projects training CNNs and other models on the MNIST OCR dataset.
 
 I also participated with some colleagues in the FME datathon 2023 in which we developed a small model to classify outfits. This was a rather small project in which we all had very little experience with AI models. I led the team to clean the dataset and we brainstormed different ideas for outfit prediction. In the end, we came up with a simple neural network classifier that, given 2 objects in the dataset, predicted the most fitting other object in the sample data. Given more time, we would have liked to implement some human feedback in the loop, but we fell short on time due to our lack of experience.
+
+In the near future, I will be doing my master's thesis on optimizations for the performance of LLMs on modern CPU architectures.
