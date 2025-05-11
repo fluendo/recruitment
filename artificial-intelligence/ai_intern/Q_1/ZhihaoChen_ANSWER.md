@@ -47,6 +47,7 @@ A misclassification in such a case could be due to several reasons:
 #### 3. **What do you think will occur when running this AI in a different country with different plate formats? How would you ensure system accuracy?**
 
 If the training dataset includes only local plates (e.g., UK), the model may not generalize well to plates from other countries due to different formats and styles. The system may fail because it's overfitted to the training distribution.
+
 **Solutions**:
 
 * Retrain or fine-tune the model using local data from the new country.
