@@ -1,0 +1,55 @@
+1. What do you think it occurred during this model development (training & evaluation)?
+
+Based on the information provided in the supplementary documents, two possible explanations can be assumed regarding the model’s development:
+
+1. It is likely that both the training and test datasets consisted mostly of clear images with minimal noise or blurring. This means that while the model may have achieved high evaluation metrics on the test set, its bad generalization ability to real-world scenarios results in many misclassifications. 
+2. Another possibility is that the developers used blurred images in both the training and test sets. However, the distribution of the pixels of the dataset was not similar to the real world scenarios. When there is a distributional mismatch between the test data and actual data, models tend to perform well in evaluation stage but fail in practical applications. Hence, the model might struggle with distinguishing between visually similar characters or processing license plates on vehicles with similar color.
+
+2. How would you fix this behavior? Please provide at least 2 options explaining their pros and drawbacks
+
+For the first assumption, one solution is to retrain the model with blurry images by adding some noise or obtaining a new noisy dataset. The main advantage of this approach is that it can improve the model’s robustness to real-world conditions, where images are often blurry or noisy. This may lead to improved accuracy and more reliable performance in deployment. However, this approach is time-consuming and may require multiple training iterations for hyperparameter tuning or changes to the model architecture. Another solution is to use a deblurring model to preprocess the real-world images before passing them to the main model. While this method increases computational load and inference time due to the extra processing step, it avoids the need for retraining the main model and can be more efficient in terms of development time.
+
+For the second assumption, one possible solution is obtain new big dataset with similar distribution to the real world at least for the validation and test sets, and retrain from scratch the model trying to achieve high scores for validation set. Retraining the model from scratch on this dataset would help improve generalization. The drawback of this method is that it is resource-intensive and time-consuming. An alternative is to collect a smaller dataset that reflects the real-world distribution and use it to fine-tune the existing model. This can be done by freezing some of the model layers and retraining only a few. This approach requires less data and training time but demands careful selection of which layers to retrain to achieve meaningful improvements.
+
+3. What do you think it will occur when running this AI in a different country with different plates formats? How would you ensure system accuracy?
+
+If during training they have used a dataset corresponding to only one country's format, most probably the perforce will decrease drastically when applying it to a totally different format as the model has learnt the specific patters of some certain format. To achieve high accuracy, I would finetune the model (it has already learns some general important information for the plates) to the new format by freezing some layers. This will also be useful as it will be less time consuming then training a whole model from scratch for the new format.
+
+4. Do you know any OCR (Optical Character Recognition) algorithms (Deep learning based) that could be used here?
+
+Yes, there are several deep learning-based OCR models which are well-suited for this application.
+1. LPRNet
+It is a lightweight, CNN-only architecture which is designed for license plate recognition without using RNNs. Since it is optimized for speed and suitable for embedded or edge devices, it will be useful for real-time applications in this scenario.
+2. TrOCR by Microsoft
+It is a Transformer-based OCR model which uses Vision Transformer encoder and an autoregressive text decoder. It is considered as SOTA performance on multiple OCR benchmarks and has very high accuracy which, as inferred from the issues of the current model used, is extremely essential.
+3. EasyOCR
+It is an open-source OCR library that provides a simple API for text detection and recognition, making the usage of this model easy.
+
+For the models TrOCR and EasyOCR, which are not specifically trained for license plate prediction, a training or finetuning would be required.
+
+5. Explain a Computer Vision / Artificial Intelligence project in which you have participated (goals, your role, difficulties you found, how they were solved, ...)
+
+One of the AI projects I contributed to was solar panel segmentation from remote sensing imagery, which resulted in the co-authorship of a paper published in IEEE Transactions on Geoscience and Remote Sensing titled “A Novel Framework for Solar Panel Segmentation From Remote Sensing Images: Utilizing Chebyshev Transformer and Hyperspectral Decomposition.”
+
+The objective was to develop a robust and accurate computer vision pipeline for identifying solar panels in hyperspectral satellite imagery for further monitoring and fault detection based on the identified solar panels.
+
+As a Machine Learning Researcher at Fast Foundation, I led the development of the segmentation models. I:
+
+	Engineered an ensemble model that leveraged attention mechanisms, achieving a high Intersection over Union score of 0.93.
+
+	Designed and fine-tuned hyperspectral decomposition techniques and implemented 5+ innovative band selection methods, which significantly enhanced model precision.
+
+	Developed an unsupervised neural network for image enhancement, significantly improving solar panel segmentation performance using hyperspectral images
+
+	Mentored an intern, helping her contribute effectively to the neural network development and preprocessing pipelines.
+
+One of the major challenges was dealing with the high dimensionality and complexity of hyperspectral data, which introduced noise and redundancy that negatively impacted model training and performance. Additionally, real-world satellite data often contains varying resolutions and lighting conditions, complicating feature extraction and generalization.
+To address these, I:
+
+	Introduced unsupervised neural network-based image enhancement techniques to reduce noise and increase the quality of the image.
+
+	Developed custom band selection strategies to isolate the most informative spectral channels, reducing input dimensionality without sacrificing performance.
+
+	Used ensemble and attention-based models to better capture relevant spatial and spectral features.
+
+This project not only demonstrated my ability to solve complex real-world CV problems using deep learning and hyperspectral imaging but also contributed novel insights to the research community through our IEEE publication.
