@@ -54,8 +54,8 @@ Ultimately, if the necessary resources are available, both options could be comb
 When running ANPR with an OCR system in other countries, multiple errors can occur due to the clear differences in license plates between countries—such as color, alphabet, and character arrangement. Some plates also include extra characters like dashes instead of spaces, which can seriously confuse the model during recognition.
 
 <div style="text-align: center;">
-  <img src="../imagery/plates.png" alt="Plate 1" width="20%" style="display: inline-block; margin-right: 2%;">
-  <img src="../imagery/ocr_plates.png" alt="Plate 2" width="20%" style="display: inline-block;">
+  <img src="../imagery/Matricula_Rusa.png" alt="Plate 1" width="20%" style="display: inline-block; margin-right: 2%;">
+  <img src="../imagery/Matricula_UK.png" alt="Plate 2" width="20%" style="display: inline-block;">
 </div>
 
 Here’s an example: a Russian license plate compared to a UK one shows these differences very clearly.
