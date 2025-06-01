@@ -4,12 +4,13 @@
 #include <gst/gst.h>
 #include <gst/video/videooverlay.h>
 
-#include <gdk/gdk.h>
-#include <gdk/gdkx.h>
+//#include <gdk/gdk.h> //macOS adaptation
+//#include <gdk/gdkx.h> //macOS adaptation
 
 /* Structure to contain all our information, so we can pass it around */
 typedef struct _CustomData {
   GstElement *playbin;            /* Our one and only pipeline */
+  GstElement *video_sink;         /* Added line */
   GtkWidget *main_window;         /* The uppermost window, containing all other windows */
   GstState state;                 /* Current state of the pipeline */
   gint64 duration;                /* Duration of the clip, in nanoseconds */
@@ -19,15 +20,16 @@ typedef struct _CustomData {
  * At this point we can retrieve its handler (which has a different meaning depending on the windowing system)
  * and pass it to GStreamer through the VideoOverlay interface. */
 static void realize_cb (GtkWidget *widget, CustomData *data) {
-  GdkWindow *window = gtk_widget_get_window (widget);
-  guintptr window_handle;
+  //g_object_set (data->video_sink, "widget", widget, NULL);
+  //GdkWindow *window = gtk_widget_get_window (widget);
+  //guintptr window_handle;
 
-  if (!gdk_window_ensure_native (window))
-    g_error ("Couldn't create native window needed for GstVideoOverlay!");
+  //if (!gdk_window_ensure_native (window))
+    //g_error ("Couldn't create native window needed for GstVideoOverlay!");
 
-  window_handle = GDK_WINDOW_XID (window);
+  //window_handle = GDK_WINDOW_XID (window);
   /* Pass it to playbin, which implements VideoOverlay and will forward it to the video sink */
-  gst_video_overlay_set_window_handle (GST_VIDEO_OVERLAY (data->playbin), window_handle);
+  //gst_video_overlay_set_window_handle (GST_VIDEO_OVERLAY (data->playbin), window_handle);
 }
 
 /* This function is called when the PLAY button is clicked */
@@ -173,9 +175,11 @@ int main(int argc, char *argv[]) {
   data.duration = GST_CLOCK_TIME_NONE;
 
   /* Create the elements */
+  data.video_sink = gst_element_factory_make ("glimagesink", "videosink");
   data.playbin = gst_element_factory_make ("playbin", "playbin");
-  video_sink = gst_element_factory_make ("ximagesink", "videosink");
-  g_object_set (data.playbin, "video-sink", video_sink, NULL);
+  //video_sink = gst_element_factory_make ("gtkglsink", "videosink");//macOS adaptation
+  //video_sink = gst_element_factory_make ("ximagesink", "videosink");
+  g_object_set (data.playbin, "video-sink", data.video_sink, NULL);
 
   if (!data.playbin) {
     g_printerr ("Not all elements could be created.\n");
