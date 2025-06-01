@@ -26,6 +26,8 @@ In 2024, several UK drivers were wrongly fined up to £105 for failing to pay th
 
 Please provide a document (and extra data if any) answering each question below; please note that no practical exercises are required here (just theoretical analysis) but feel free to add any.
 
+<br />
+<br />
 
 1. What do you think it occurred during this model development (trainning & evaluation)?
 
@@ -33,7 +35,8 @@ Seeing this error when detecting the number plates of the UK cars, and with the 
 
 It is also possible that the system did not have a post-OCR verification phase or that there was no cross validation system with database such as colour and make of vehicle vs. number plate verification. All this together can lead to the failure of ANPR in certain cases.
 
-
+<br />
+<br />
   
 2. How would you fix this behavior? Please provide at least 2 options explaining their pros and drawbacks
 
@@ -50,7 +53,8 @@ The main advantage of this option is that it pushes the model closer to its full
 
 Ultimately, if the necessary resources are available, both options could be combined to minimize the probability of error.
 
-
+<br />
+<br />
    
 3. What do you think it will occur when running this AI in a different country with different plates formats? How would you ensure system accuracy?
 
@@ -66,7 +70,8 @@ Here’s an example: a Russian license plate compared to a UK one shows these di
 To prevent this from happening, one solution would be to train a version of the OCR model specifically adapted to each country, using local data and plate formats. The advantage of this approach is that it would be very accurate and make very few mistakes, since it can adapt to the specific details of each country. However, the downside is that it would take a lot of time and require country-specific datasets, which would be expensive and slow to gather.
 A more viable alternative would be to build a multi-format model, where the system first detects which country the license plate belongs to, and then applies the specialized OCR model for that format. This is much more scalable and flexible, as it allows a single system to work across various scenarios. The downside is the technical complexity of implementing this multi-format pipeline, and the added risk of misidentifying the country of the license plate.
 
-
+<br />
+<br />
 
 4. Do you know any OCR (Optical Character Recognition) algorithms (Deep learning based) that could be used here?
   
@@ -74,7 +79,8 @@ A more viable alternative would be to build a multi-format model, where the syst
   
   Additionally, in my free time, I’ve read some papers on optical character recognition, and I’ve seen that Sequence-to-Sequence models often deliver good results. I don’t fully understand how these models work yet, but I’m very interested in learning more and continuing to build my knowledge in this area.
 
-
+<br />
+<br />
 
 5. Explain a Computer Vision / Artificial Intelligence project in which you have participated (goals, your role, difficulties you found, how they were solved, ...)
 
