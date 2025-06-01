@@ -14,8 +14,8 @@ Para arreglar este comportamiento, primero, utilizaría objetos de prueba de mej
 Lo que ocurriría con esta IA al ser utilizada en otro país es que se encontrara con distintos tipos de matrícula, ya que las matrículas son identificadores únicos de cada sitio como los números telefónicos. Por ejemplo:
 
 <div style="text-align: center;">
-  <img src="datos/plateUK.png" alt="Plate 1" width="20%" style="display: inline-block; margin-right: 2%;">
-  <img src="datos/plateUS.png" alt="Plate 2" width="20%" style="display: inline-block;">
+  <img src="datos/plateUK.png" alt="Plate 1" width="40%" style="display: inline-block; margin-right: 2%;">
+  <img src="datos/plateUS.png" alt="Plate 2" width="40%" style="display: inline-block;">
 </div>
 
 Para asegurar precisión, hay que entrenar el modelo según el país donde se encuentre, aunque esto podría llevar tiempo y bajaría su utilidad siendo más fácil el uso humano, ya que las matrículas pueden diferenciar mucho y una IA sin una actualización que pueda reconocer vehículos y placas como lo hace un cerebro humano solo generaría problemas y confusión. Es decir, una manera más correcta sería conseguir modelar una IA como un humano en el tema identificación.
