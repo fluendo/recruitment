@@ -8,7 +8,6 @@ Creo que lo que ocurrió durante el entrenamiento y la evaluación de este model
 
 Para arreglar este comportamiento, primero, utilizaría objetos de prueba de mejor calidad, en donde las matrículas y los coches puedan verse a buena calidad y el modelo pueda observar más detalles. Segundo, añadiría un sistema de recompensa donde si encuentra al mismo coche, con la misma matrícula, la misma marca, es decir, idéntico, conseguiría una gran recompensa, pero si encuentra pocas similitudes, por ejemplo misma marca y color pero distinta matrícula, le pondría una recompensa mucho menor para que evite buscar similitudes vagas.
 
-
 3. What do you think it will occur when running this AI in a different country with different plates formats? How would you ensure system accuracy?
 
 Lo que ocurriría con esta IA al ser utilizada en otro país es que se encontrara con distintos tipos de matrícula, ya que las matrículas son identificadores únicos de cada sitio como los números telefónicos. Por ejemplo:
