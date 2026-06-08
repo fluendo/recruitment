@@ -197,7 +197,7 @@ Config mgmt
 - Registry: MLflow Model Registry with stage gates: Staging → Production
 - Export: ONNX using TensorRT (for NVIDIA edge/server) or OpenVINO (for Intel edge)
 - Serving: Triton Inference Server — multi-model, dynamic batching, built-in metrics
-- GStreamer pluging: Custom GStreamer element wraps Triton client, integrating natively into Fluendo's Raven AI Engine pipeline
+- GStreamer plugin: Custom GStreamer element wraps Triton client, integrating natively into Fluendo's Raven AI Engine pipeline
 
 
 ### Monitoring & Drift Detection
@@ -238,3 +238,4 @@ Face anonymisation is a background system component. Users experience it indirec
 
 
 ## 7. (EXTRA) Provide a code snippet (practical example) on how would you implement any of these applications: reidentification or depth estimation, for face anonymization.
+Pseudo code for reidentification pipeline available in the file reidentification.pseudo
