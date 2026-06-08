@@ -1,0 +1,63 @@
+class FaceEmbeddingsExtractor:
+    "Abstract Class for Face Embeddings Extractor"
+    # NB: I choose the inheritance pattern for its flexibility, there might be better tradeoff for simplicity of implementation depending on other choices
+    # For production code I would expect to have a class to create the embeddings defined elsewhere and just imported here for example
+    abstract_function __init__
+    abstract_function process(list[images]) -> list[embeddings]
+
+class FaceEmbeddingsExtractorMobileFaceNet(FaceEmbeddingsExtractor):
+    "Face Embeddings Extractor definition for MobileFaceNet"
+        function __init__(self)
+            "Initialise MobileFaceNet model, its weight, the runtime, and any parameters it might need"
+    
+        function process(list[images]) -> list[embeddings]
+            "Process the image and return the embedding. Assumes there is an optimization to run parallel on images"
+
+class FaceGallery:
+    function __init__(self)
+        "Initialise Face Analysis class and the matrix containing the embeddings. The number of samples is somewhat limited, in case we need something to work at scale indexes optimizations are needed"
+        - create matrix to contain embeddings
+            - can create an empty matrix or load a matrix from file system or S3, the next id vector needs to be filled appropriately
+        - for legal reasons we might need to keep track of identity, therefore we need to create a vector to store an ID that will be used to identify the rows in the matrix (for example [[1, Davide], [2, Aleix], ...], the first value of the embedding row can be an index that point to this vector - no rows can be deleted from this vector if there is still a row in the matrix
+        - select mode for embeddings (for example "mean", "original_embeddings", ...)
+        - load FaceEmbeddingsExtractor concrete inherited class
+        - select the default threshold for similarity
+
+    function enrol(self, id, images: list[image])
+        "Add a new face into the gallery"
+        - chech images is not empty and id is valid, if not raise a warning and do not run the following rows
+        - embeddings = face_embedding_extractor.process(list[image])
+        - update the id vector with the new identity and prepend the id to each embedding
+        - depening on the mode, append each embedding to the matrix or compute mean (or whatever operator) before inserting the aggregated embedding
+
+    function compute_similarity(list[embeddings], matrix, method="cosine_distance")
+        "Computes similarity between each embedding and all the rows in the matrix. Uses the method specified. Each embedding is compared with every row in the matrix (excluding indexes)"
+
+    function is_whitelisted(self, list[image_crop]):
+        "Return list of True/False wheter each face detected matches any gallery identity above threshold."
+        list[embedding] = face_embedding_extractor.process(list[image_crop])
+        list[similarity] = compute_similarity(list[embedding], matrix, "cosine_distance"))
+        list[is_whitelisted] = similarity > threshold
+        return list[is_whitelisted]
+
+class SelectiveAnonymizer:
+    function __init__(self)
+        detector  = YOLO(DETECTOR_WEIGHTS)
+        gallery = FaceGallery()
+        blur = GaussianBlur()
+
+    function process_frame(self, frame) -> processed_frame
+        boxes = detector(frame)
+        images_crop = [for box in boxes crop(frame, box)]
+        is_whitelisted = gallery.is_whitelisted(images_crop)
+        output = for each crop which is (not is_whitelisted) apply blur() on original frame
+        return output
+
+""""
+# optimizations
+1) parallel processing of embeddings already implemented, depends on the class FaceEmbeddingsExtractorMobileFaceNet implementations to see improvements
+2) Use half-precision (FP16) inference, depends on the implementation of the FaceEmbeddingsExtractorMobileFaceNet 
+3) might need more sofisticated indexing (for example FAISS as suggested by Claude) if the size of the embeddings matrix is too large
+4) use YOLO confidence threshold to skip marginal detections
+5) Cache embeddings for tracked faces across frames (IoU-based tracking e.g. ByteTrack) — ReID fires only on first appearance or re-entry. For these we can process the output of the detector with Byteframe and apply an ID. If the ID has already been seen before there is no need to use is_whitelisted again. Needs a matrix to keep track of the information from the last frame (potentially more than 1 frame in case we would like to reduce noise)
+"""
