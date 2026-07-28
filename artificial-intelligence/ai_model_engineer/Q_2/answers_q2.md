@@ -25,12 +25,13 @@ If the first accuracy is high but the second one is low, then the problem has co
 
 Wrong data will always make a system underperform and/or make wrong predictions. In our system's case:
 
-- If keypoints are slightly differently labelled the pose estimation model can lose stability, increasing jittering and/or producing lower confidence scores. Apart from that, the classifier uses metrics derived from pose to classify. If specially wrists and elbows are wrongly annotated, these body parts' related metrics as it could be wrist speed, which are probably feeded into the classifier. And for hit-event classifier being padel the sport that concerns this system, elbow and wrist are fundamental to be correctly annotated, as even small errors modify the hand-arm motion.
+- If keypoints are slightly differently labelled the pose estimation model can lose stability, increasing jittering and/or producing lower confidence scores. Apart from that, the classifier uses metrics derived from pose to classify. If specially wrists and elbows are wrongly annotated, these body parts' related metrics as it could be wrist speed, which are probably fed into the classifier. And for hit-event classifier being padel the sport that concerns this system, elbow and wrist are fundamental to be correctly annotated, as even small errors modify the hand-arm motion.
 - If hit timestamps are shifted by a few frames, the model won't be able to learn when exactly the hit happens. Motion before and after the impact may be similar, so a few frames can confuse the model and disabling it to correctly classify the hits.
 
 How would I detect label-quality problems at scale without inspecting frame by frame? 
 
 - Regarding the pose estimator, I would measure inter-annotator agreement per-joint with the Mean Per Joint Position Error. That simple metric can leads us to detect bad label-quality.
+
 - In terms of the label-quality for the hit timestamps, an informative indicator could the frame-offset diagreement between annotators. Frame-offset is just the difference in frames between two annotators for a hit being marked. Measuring the distribution of disagreement across all of our annotators, can leads us to flag who is shifted.
 
 Decision criteria for relabelling, filtering or reweighting for each dataset part inconsistently annotated would be based on:
@@ -43,8 +44,6 @@ With reasons for each action exposed, for our task I would definitely prioritize
 
 ---
 
-
-
 #### Q3: Smashes are rare in the dataset but very important for the product. The model often misses them while performing well on common hits. Without changing the model architecture, explain which dataset, training, and evaluation strategy changes you would consider. Here, the idea is to discuss tradeoffs and risks of each approach and how you would verify that improvements are real and not overfitting artifacts.
 
 As long as the architecture must remain the same, the following suggestions could be taken into account for solving the stated issue:
@@ -53,15 +52,11 @@ As long as the architecture must remain the same, the following suggestions coul
 
 Given that smashes are crucial for the final product, dataset strategies may imply increasing our training samples for the model to learn the patterns accordingly and in the end detecting better the smashes. During the test, both in Q1 and Q2, data augmentation has been a discussed topic and here applies as well. Undersampling other classes to balance the dataset could be also an option. However, if the model performs accurately for other classes, we risk it doing worse for them. 
 
-Oversampling the smash class entails the risk of the model memorizing background, angles and conditions instead of learning to classify them. However, through techniques like random erasing, changing the brightness, scaling, or even apply speed perturbations we could aim to adress this risk. 
-
-A more complex way to increase our smashes' samples could be using a diffusion model to generate them. But this increases costs and complexity as well. If the class value for the product requires it, and we have the resources available, it is an option that could bring results for us, even though overfitting risk still exists.
+Oversampling the smash class entails the risk of the model memorizing background, angles and conditions instead of learning to classify them. To mitigate this, augmentation techniques like random erasing, changing the brightness, scaling, speed perturbations or frame dropping could be applied so oversampled clips remain diverse. Alternatively, SMOTE could be used to generate synthetic samples by interpolating in feature space.
 
 ##### 2. Training Changes
 
 Assuming we still have low-representation for smashes' samples, and architecture must not be changed, the used loss function needs to be changed (or not the function at all but adjusted). As we have few examples for smash events, I would use a focal loss, with the adjustment of forcing the model to focus on hard examples, down-weighting easy examples. In this case, assuming we don't have a labelling problem as the stated in the previous question, no extra noise would be introduced (non-smash noisy samples would be considered difficult to classify), and it may work. The risk we are taking here is hurting our actual precision for other classes if we do not decide correctly our weights' values. 
-
-Apart from loss adjustment, batch sampling during process could be altered too, increasing the percentage of smash hits appearing in the batch. However, this strategy is not further considered as the model would learn that smashes happen with a higher frequence during a match than the one they actually do with.
 
 ##### 3. Evaluation Changes
 
@@ -85,7 +80,7 @@ However, to support this decision, some additional tests could be conducted so t
 
 - The ideal scenario for us would be the more accurate model to behave stable and reliable. To confirm in which degree this unstability is being produced, we could compute metrics related to temporal smoothness. For instance, the variance in frame-to-frame displacement or the frame-to-frame position displacement of the keypoints. I would do these both in a global metric and per-joint. As well , Percentage of Correct Keypoints is a metric that also could bring us useful information.
 
-Besides that, we could compute when jittery keypoints between frames leads us to the stated inconsistency regarding hit timing. I would add two specific metrics for this: on one hand, I would measure the Timing Jittery Standard Deviation, so the std is computed between the GT and predicted hit frame, and on another hand I would add a temporal IoU to evaluate if a hit falls within an acceptable temporal window. Which is acceptable or not should be discussed previously with the team, but I would suggest +/- 2/3 frames.
+Besides that, we could compute when jittery keypoints between frames leads us to the stated inconsistency regarding hit timing. I would add two specific metrics for this: on one hand, I would measure the standard deviation of the frame-level hit prediction error, so the std is computed between the GT and predicted hit frame, and on another hand I would add a temporal IoU to evaluate if a hit falls within an acceptable temporal window. Which is acceptable or not should be discussed previously with the team, but I would suggest +/- 2/3 frames.
 
 - Regarding the tests and scenario-based evaluations I would suggest to perform, I would target edge cases and conditions, so we compare both models in terms of temporal variance and stability. The following could be explicative for us:
 

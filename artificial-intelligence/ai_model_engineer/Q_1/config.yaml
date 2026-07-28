@@ -1,0 +1,20 @@
+face_detector:
+  model_path: models/yolov8n-face.pt
+  confidence_threshold: 0.25
+
+depth_estimator:
+  model_type: MiDaS_small       # MiDaS_small | DPT_Hybrid | DPT_Large
+
+anonymizer:
+  method: blur               # blur | pixelation | masking
+  blur_kernel_size: 151           # odd integer, used when method=blur
+  pixelation_block_size: 10      # pixel block size, used when method=pixelation
+  mask_color: [0, 0, 0]          # BGR, used when method=masking
+  depth_threshold: 0.4           # faces with median depth >= this are foreground
+
+pipeline:
+  device: auto                   # auto | cpu | cuda | mps
+
+output:
+  output_path: output.jpg         # 2x2 grid with all panels
+  display: false

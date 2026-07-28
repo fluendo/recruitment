@@ -28,29 +28,31 @@ With that new step introduced, target individuals could be identified and so tha
 
 In aim of extending the pipeline with depth-based filtering so foreground and background content are differentiated and then that last one blurred, we must evaluate which kind of scenario are we in. There are depth estimation pre-trained models which produce a per-pixel depth map frame by frame. With that information we could decide establishing a threshold if a pixel corresponds to the foreground or to the background. 
 
-However, in this case we focus on faces, and so that on people. That is the reason why a person segmentation model could be run to differentiate them from background objects. With this approach, individuals would be kept sharp while background would be blurred. Theoretically, these kind of models are computationally cheaper than the depth-estimation ones, so our latency would not be compromised at all with them. Besides that, we could make it efficient by merging the mask of the segmentation model with the face detector.
+The straightforward approach would be to use a lightweight pre-trained depth-estimation model. Through a fine-tuning we could have depth estimated maps and we could use add this information to our pipeline. At this point, the pipeline encompasses face detection and anonymization. If we parallelize the face detection and depth estimation, we would have the bboxes and depth maps. These last maps could be used for the goal stated: differenciating foreground from background objects using a threshold.
 
-It is the simpler and cheaper approach. However, it is true that crowded scenes or scenarios where segmentation models struggle could compromise a person detection/segmentation and so that compromising its anonymization. Depending on which scenario are we in, this approach could work or we would have to go for a depth-estimation model fine-tuning together with efficiency measures so the cost is not compromised.
+In this case we focus on faces, and so that on people. That is the reason why a person segmentation model could be an alternative to differentiate them from background objects. With this approach, individuals would be kept sharp while background would be blurred. Theoretically, these kind of models are cheap so our latency would not be compromised at all with this option.
 
-Regarding this last one approach, the cheapest while effective architecture would be a FastDepth, which is a mobile encoder-decoder. Also architectures heavier (but als sharper) as MiDaS could be considered. However, if we take into account all the modules involved in the system, a FastDepth with a bit of post-processing could solve the task stated. Among these operations, if the result is not the expected but not far from it, I would suggest to add temporal EMA (Exponential Moving Average) to correct possible flicker in video sequence, or morphological operations to correct individuals boundaries.
+However, for our case the maps generated from the depth estimator would be more useful as several options arise from their addition to the pipeline. From supporting the face detector to prevent it from false positive, to using these maps to anonymize just first-plane faces, or even use it to apply stronger blur on nearer faces than deeper-planes' ones. 
+
+After some research, the cheapest while effective architecture has found out to be a FastDepth ([https://arxiv.org/abs/1903.03273](https://arxiv.org/abs/1903.03273)), which is a mobile encoder-decoder. Also architectures heavier (but also sharper) as MiDaS ([https://arxiv.org/abs/1907.01341v3](https://arxiv.org/abs/1907.01341v3)) could be considered. MiDaS has a lightweight pre-trained model that could be the selected option, as it is expected to be more accurate than FastDepth while being computationally acceptable for our system.
+
+Regarding the threshold selection to determine foreground/background if using a depth-estimation model, I suggest to compute the depth histogram of detected faces and use a percentile-based threshold. That statement is done based on us making the decision, but we could also let the user configure the cutoff in the final product.
 
 To end up with this question, if a depth-estimation module is added, it could be used to define ROIs, and so that aiming to detect/re-identify just in these stated regions.
 
 ---
 
-
-
 ###### Q3. Imagine we have this case: our face detection system does not detect properly (bad accuracy) dark-skins nor bald-people; how would you improve system accuracy?
 
-This case could be derived from many possibilities related to our data. Firstly, there could be a lack of representative training samples for these collectives. If not, then features could rely too havily in specific visual aspects that indirectly harm the predictions for bald and dark-skin people. We assume here the root cause to be unrepresented training data for these classes. Given that, our goal would be to rebalance the dataset distribution withou discarding useful data.
+This case could be derived from many possibilities related to our data. Firstly, there could be a lack of representative training samples for these collectives. If not, then features could rely too havily in specific visual aspects that indirectly harm the predictions for bald and dark-skin people. There is also a possibility that the architecture has an inherent bias and it is not a data problem.
 
-In order to achieve our goal, I would rather oversampling the minority classes so we don't risk the model's performance across the rest of classes nor throw away useful samples, as mentioned above. To do so effectively, I would propose using a generative model so synthetic samples are added to our dataset. Instead of generating them from scratch, we could use an image to image pipeline so random current samples of our dataset would be passed through a set of modifications (as removing hair or darkening their skin) so real-world face structures and environment conditions as lightening are kept.
+We assume here the root cause to be unrepresented training data for these classes. Given that, our goal would be to rebalance the dataset distribution without discarding useful data. 
 
-The selected approach has associated costs. However, it does not increase the cost for the real-time system as belongs to the detector training pipelina. That is the reason why it has been selected although introducing additional computation. If there were an alternative constraint in this way, other non-generative options could be studied in order to oversample these minority classes.
+In order to achieve our goal, I would rather oversampling the minority classes so we don't risk the model's performance across the rest of classes nor throw away useful samples, as mentioned above. To do so effectively, I would propose using a generative model so synthetic samples are added to our dataset. Instead of generating them from scratch, we could use an image to image pipeline so random current samples of our dataset would be passed through a set of modifications (as removing hair or adjusting skin tone) so real-world face structures and environment conditions as lightening are kept.
+
+The selected approach has associated costs. However, it does not increase the cost for the real-time system as belongs to the detector training pipeline. That is the reason why it has been selected although introducing additional computation. If there were an alternative constraint in this way, other non-generative options could be studied in order to oversample these minority classes.
 
 ---
-
-
 
 #### Q4. Imagine this other case: let's assume we have added several bald people imagery to our dataset and we still are not increasing the accuracy. What may be happening? How would you fix this?
 
@@ -58,11 +60,9 @@ If several bald people images have been added and the model still predicts it wr
 
 Apart from the quality of the images, and assuming they have been correctly labelled, if they are very similar between them, or do not include variety regarding gender, ethnics, or even age, the model could be memorizing them and not generalizing as expected. Domain-specific characteristics as lightning must be similar to other classes, so we ensure the model is not learning from the environment but from the individual.
 
-In case data looks correct and we carried out the analysis without extracting any significant conclusion, then we could adjust the classification loss. We could try to use the focal loss, which is proven to work with difficult classes or hard-to-classificate samples. If not, then adding a higher weight for the bald-people class in our current loss could also work, as we would be forcing it to penalize in a heavier way errors in this class.
+In case data looks correct and we carried out the analysis without extracting any significant conclusion, then we should check the pipeline step by step. For instace, maybe the model detects the face but it is missclassifying it or suppressing it in NMS. If any conclusion is extracted from the debugging step, then we could review the training setup, adjusting first the classification loss. We could try to use the focal loss, which is proven to work with difficult classes or hard-to-classificate samples. If not, then adding a higher weight for the bald-people class in our current loss could also work, as we would be forcing it to penalize in a heavier way errors in this class.
 
 ---
-
-
 
 #### Q5. Which MLOPs infrastructure would you design to manage this system? Just provide a high-level design and which tools would you use.
 
@@ -86,13 +86,14 @@ Tools: Grafana for monitoring dashboards and an appropiate data drift and qualit
 
 ---
 
-
-
 #### Q6. From end user POV, which techniques would you use to improve final solution user experience?
 
 A final user would like to configure easily and understand what is happening in our system. That is why I would apply the following three improvements for a final product. I assume a user-friendly interface and the improvements do not regard any question of design, which I understand would also be crucial for the user to interact with the final solution:
 
-- Let the user configure which kind of anonymization prefers among the stated: blur, pixelation or masking. Also I would add an option to configure if he/she wants to anonymize all the faces or just selected identities.
+- Let the user configure which kind of anonymization prefers among the stated: blur, pixelation or masking. Also I would add an option to configure if he/she wants to anonymize all the faces or just selected identities, either selecting them from a menu or clicking on faces to exclude/include from anonymization.
+
 - The user needs the video to be smooth, so that I would apply temporal filters so the blurring (or masking or pixelling) does not flicker frame to frame.
+
 - I would show clear feedback on what was anonymized and why. I would add some kind of preview mode where detection shows what would be anonymized in a selected video/image. Like a before/after preview. Besides that, I would not silent missing faces (both preview or not) but marking them as uncertainty zone.
 
+- Add a section, or icon, informing the user that the system complies with the EU AI Act privacy and risk-control expectations.

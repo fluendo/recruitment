@@ -1,0 +1,7 @@
+models/
+__pycache__/
+*.pyc
+*.pyo
+.env
+output*.jpg
+.venv/
