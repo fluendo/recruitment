@@ -97,3 +97,47 @@ A final user would like to configure easily and understand what is happening in 
 - I would show clear feedback on what was anonymized and why. I would add some kind of preview mode where detection shows what would be anonymized in a selected video/image. Like a before/after preview. Besides that, I would not silent missing faces (both preview or not) but marking them as uncertainty zone.
 
 - Add a section, or icon, informing the user that the system complies with the EU AI Act privacy and risk-control expectations.
+
+#### Q7. Provide a code snippet (practical example) on how would you implement any of these applications: reidentification or depth estimation, for face anonymization.
+
+*I decided on depth estimation because I worked on ReID for my TFG. I attach the presentation of my work that I prepared back then with the solution, in case you'd like to have a look. 
+
+##### Description
+
+Inside the Q_1/src folder you can find a simple code snippet that combines face detection with monocular depth estimation for face anonymization*. The practical example anonymizes only foreground faces, leaving background ones untouched. In a real-world setting, this approach could be useful because near-plane faces have more pixels and clearer biometric detail, so they are easier to re-identify than distant faces. Depth-based filtering concentrates anonymization where privacy risk is higher.
+
+The code is split into the following modules:
+
+* Face Detector: Contains a YOLOv8n face model, which has already been trained on WIDER FACE dataset by the community ([http://shuoyang1213.me/WIDERFACE/](http://shuoyang1213.me/WIDERFACE/)). This selection has been based on several factors. Firstly, it is assumed in the test a YOLO-style CNN detector. Furthermore, it is a lightweight pre-trained variant, so the example stays simple as the question focuses on depth estimation, not designing the detector.
+
+* Depth Estimator: Within the Q2, two options have been mentioned: FastDepth and MiDaS. The first assumption to select the second one for the implementation is the ease of access for its weights. Its most lightweight version (MiDaS_small) has been chosen for the practical example. It produces a per-pixel relative depth map normalised  to [0,1], where higher values mean closer to the camera. The architecture uses an EfficientNet-Lite3 encoder with a lightweight decoder ([https://huggingface.co/Heliosoph/midas-small-onnx](https://huggingface.co/Heliosoph/midas-small-onnx)), being suitable for real-time tasks.
+
+* Anonymizer: Applies a filter to the selected face regions. Here all of three methods mentioned within the statement are supported and can be configured through the yaml file: Gaussian blur, pixelation and colour masking. In the last case a filled and coloured square is assumed to act as a mask for this example.
+
+<p align="center">
+    <img src="../imagery/esquema.png" alt="Pipeline" />
+</p>
+
+These modules are orchestrated by Pipeline script, that runs face detection and depth estimation in parallel for each frame via threading pool.
+
+The main script then filters detections by median depth inside each bbox and anonymizes only the faces classified as foreground. The depth threshold is configurable, and its selection has been discussed along Q2. Besides that, the main script handles CLI arguments, initialization, the frame loop and the ouput writting. Regarding the CLI arguments, in this case just path to a particular video (through --video) and a custom config file (through --config) have been added, given that all the snippet configuration is managed in the config.yaml file.
+
+For an input video, a clean anonymized video and a 2x2 diagnostic grid are generated as output. The visualization module encompasses this task. The grid contains face detections, depth heatmap, foreground and background preview and the anonymized video. This can be useful for debugging and inspection.
+
+It has been mentioned above, but all system parameters are encompassed in a single yaml file, so the behaviour can be changed easily without modifying the code.
+
+To test if the system works, I have recorded myself a short video where I stay in a near-plane and then in a further one, to see how does it perform. Also, I selected a setup where a structure in the middle generates slight occlusion in some frames when I walk by it.
+
+Note: For a dataset I would use DVC. However, given that I just processed a single video, I have not used it. Videos won't be uploaded to Git neither, but delivered in a compressed file through the answering mail.
+
+##### Next steps
+
+I am aware an evaluation framework is missing in this snippet. However, at a first glance of the output generated, I detected a visual aspect that could be striaghtforward solved. I included a screenshot of the corresponding problem to be adressed: The depth mask created noisy boundaries around my silhouette. Some parts of my body were being blurred, so that incorrectly classified. Within the outputs, I attach in the same folder the grid with the changes applied, named output_grid_v2.mp4 
+
+<p align="center">
+    <img src="../imagery/screenshot_error.png" alt="<Screenshot Error>" />
+</p>
+
+With the aim of having an evaluation, we should be recording new videos, annotating them and processing them through our pipeline, so we obtain metrics as Precision, Recall, IoU, Anonymization rates, Depth accuracy... This step has not been carried out at this point but it is the inmediate next one.
+
+Measuring the latency both overall and per-module is crucial as well if we think about real-time environment. This single processing is offline, but for a hypothetic final product are primordial. As well, unity tests for each one has not been included neither and they should.

@@ -12,9 +12,15 @@ anonymizer:
   mask_color: [0, 0, 0]          # BGR, used when method=masking
   depth_threshold: 0.4           # faces with median depth >= this are foreground
 
+depth_mask:
+  close_ksize: 15                # morphological closing kernel (fills holes)
+  dilate_ksize: 7                # dilation kernel (expands foreground boundary)
+  feather_ksize: 21              # Gaussian feather for soft edges (0 = disabled)
+
 pipeline:
   device: auto                   # auto | cpu | cuda | mps
 
 output:
-  output_path: output.jpg         # 2x2 grid with all panels
-  display: false
+  grid_path: output_grid.mp4      # 2x2 diagnostic grid video
+  anonymized_path: output_anon.mp4 # clean anonymized video
+  codec: mp4v                      # fourcc codec for output videos

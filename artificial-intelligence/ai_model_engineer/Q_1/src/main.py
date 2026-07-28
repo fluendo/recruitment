@@ -1,11 +1,11 @@
-"""CLI entry-point for the face-detection + depth-estimation pipeline.
+"""CLI entry-point for the video face-anonymization pipeline.
 
 Run with::
 
-    python -m src.main --image path/to/photo.jpg
+    python -m src.main --video path/to/video.mp4
 
 All system parameters are read from a YAML config file (default:
-``config.yaml``).  Only ``--image`` and ``--config`` are accepted as CLI
+``config.yaml``).  Only ``--video`` and ``--config`` are accepted as CLI
 arguments.
 
 Use ``--help`` to see available options.
@@ -27,25 +27,27 @@ from src.anonymizer import Anonymizer
 from src.depth_estimator import DepthEstimator
 from src.face_detector import FaceDetector
 from src.pipeline import Pipeline
-from src.visualization import compose_grid, save_and_show
+from src.visualization import compose_grid, refine_depth_mask
 
 
 def _filter_foreground_faces(
     faces: list[dict],
-    depth_map: np.ndarray,
-    threshold: float,
+    refined_mask: np.ndarray,
 ) -> list[dict]:
-    """Keep only faces whose median depth is at or above *threshold*.
+    """Keep only faces that fall predominantly inside the foreground mask.
 
-    Higher depth values mean closer to the camera (MiDaS inverse depth,
-    normalised to [0, 1]), so faces with ``median >= threshold`` are
-    considered foreground.
+    Uses the morphologically-refined depth mask instead of raw depth
+    values so that noisy pixels at bbox boundaries do not cause
+    foreground faces to be dropped.
+
+    A face is kept when the mean mask value inside its bbox is >= 0.5,
+    meaning more than half of its pixels are classified as foreground.
     """
     foreground = []
     for face in faces:
         x1, y1, x2, y2 = face["bbox"]
-        roi_depth = depth_map[max(y1, 0):y2, max(x1, 0):x2]
-        if roi_depth.size > 0 and float(np.median(roi_depth)) >= threshold:
+        roi_mask = refined_mask[max(y1, 0):y2, max(x1, 0):x2]
+        if roi_mask.size > 0 and float(np.mean(roi_mask)) >= 0.5:
             foreground.append(face)
     return foreground
 
@@ -54,14 +56,16 @@ def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description=(
             "Run face detection (YOLO) and depth estimation (MiDaS) "
-            "in parallel on a single image, then anonymize detected faces."
+            "in parallel on each frame of a video, then anonymize "
+            "foreground faces.  Outputs a 2x2 diagnostic grid video "
+            "and a clean anonymized video."
         ),
     )
     parser.add_argument(
-        "--image",
+        "--video",
         type=str,
         required=True,
-        help="Path to the input image.",
+        help="Path to the input video.",
     )
     parser.add_argument(
         "--config",
@@ -88,6 +92,44 @@ def _load_config(config_path: Path) -> dict:
     return cfg
 
 
+def _open_video(video_path: Path) -> tuple[cv2.VideoCapture, int, float, int, int]:
+    """Open a video file and return (capture, total_frames, fps, width, height)."""
+    cap = cv2.VideoCapture(str(video_path))
+    if not cap.isOpened():
+        sys.exit(f"Error: could not open video at '{video_path}'")
+
+    total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    fps = cap.get(cv2.CAP_PROP_FPS) or 30.0
+    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+
+    return cap, total_frames, fps, width, height
+
+
+def _create_writer(
+    path: str | Path,
+    codec: str,
+    fps: float,
+    width: int,
+    height: int,
+) -> cv2.VideoWriter:
+    """Create and return a VideoWriter, exiting on failure."""
+    fourcc = cv2.VideoWriter_fourcc(*codec)
+    writer = cv2.VideoWriter(str(path), fourcc, fps, (width, height))
+    if not writer.isOpened():
+        sys.exit(f"Error: could not create video writer for '{path}'")
+    return writer
+
+
+def _format_eta(seconds: float) -> str:
+    """Return a human-readable ETA string."""
+    m, s = divmod(int(seconds), 60)
+    h, m = divmod(m, 60)
+    if h > 0:
+        return f"{h}h {m:02d}m {s:02d}s"
+    return f"{m}m {s:02d}s"
+
+
 def main(argv: list[str] | None = None) -> None:
     args = _build_parser().parse_args(argv)
 
@@ -98,15 +140,16 @@ def main(argv: list[str] | None = None) -> None:
 
     cfg = _load_config(Path(args.config))
 
-    image_path = Path(args.image)
-    if not image_path.is_file():
-        sys.exit(f"Error: image not found at '{image_path}'")
+    video_path = Path(args.video)
+    if not video_path.is_file():
+        sys.exit(f"Error: video not found at '{video_path}'")
 
-    image = cv2.imread(str(image_path))
-    if image is None:
-        sys.exit(f"Error: could not decode image at '{image_path}'")
-
-    logging.info("Image loaded: %s (%dx%d)", image_path.name, image.shape[1], image.shape[0])
+    # --- Open input video -----------------------------------------------------
+    cap, total_frames, fps, width, height = _open_video(video_path)
+    logging.info(
+        "Video opened: %s (%dx%d, %.2f fps, %d frames)",
+        video_path.name, width, height, fps, total_frames,
+    )
 
     # --- Read config sections -------------------------------------------------
     cfg_face = cfg["face_detector"]
@@ -115,7 +158,10 @@ def main(argv: list[str] | None = None) -> None:
     cfg_pipe = cfg["pipeline"]
     cfg_out = cfg["output"]
 
+    cfg_mask = cfg.get("depth_mask", {})
+
     device = cfg_pipe.get("device", "auto")
+    depth_threshold = cfg_anon.get("depth_threshold", 0.4)
 
     # --- Initialise modules ---------------------------------------------------
     detector = FaceDetector(
@@ -134,43 +180,72 @@ def main(argv: list[str] | None = None) -> None:
         mask_color=tuple(cfg_anon.get("mask_color", [0, 0, 0])),
     )
 
-    # --- Build and run pipeline -----------------------------------------------
     pipeline = Pipeline(
         face_detector=detector.detect,
         depth_estimator=estimator.estimate,
     )
 
-    logging.info("Running pipeline ...")
-    t0 = time.perf_counter()
-    results = pipeline.process(image)
-    total = time.perf_counter() - t0
+    # --- Create output video writers ------------------------------------------
+    codec = cfg_out.get("codec", "mp4v")
+    grid_path = cfg_out.get("grid_path", "output_grid.mp4")
+    anon_path = cfg_out.get("anonymized_path", "output_anon.mp4")
 
-    faces = results["face_detector"]
-    depth_map = results["depth_estimator"]
-    timing = results["_timing"]
+    grid_writer = _create_writer(grid_path, codec, fps, width * 2, height * 2)
+    anon_writer = _create_writer(anon_path, codec, fps, width, height)
 
+    # --- Frame loop -----------------------------------------------------------
+    logging.info("Processing frames (offline, device=%s) ...", device)
+    t_start = time.perf_counter()
+    last_log_time = t_start
+    frame_idx = 0
+
+    try:
+        while True:
+            ret, frame = cap.read()
+            if not ret:
+                break
+
+            results = pipeline.process(frame)
+            faces = results["face_detector"]
+            depth_map = results["depth_estimator"]
+
+            refined_mask = refine_depth_mask(depth_map, depth_threshold, **cfg_mask)
+            fg_faces = _filter_foreground_faces(faces, refined_mask)
+            anon_frame = anonymizer.anonymize(frame, fg_faces)
+
+            grid_frame = compose_grid(
+                frame, faces, depth_map, anon_frame, depth_threshold,
+                mask_cfg=cfg_mask,
+            )
+            grid_writer.write(grid_frame)
+            anon_writer.write(anon_frame)
+
+            frame_idx += 1
+
+            now = time.perf_counter()
+            if frame_idx % 10 == 0 or (now - last_log_time) >= 5.0:
+                elapsed = now - t_start
+                avg_fps = frame_idx / elapsed
+                pct = (frame_idx / total_frames * 100) if total_frames > 0 else 0
+                remaining = (total_frames - frame_idx) / avg_fps if avg_fps > 0 else 0
+                logging.info(
+                    "Frame %d/%d (%.1f%%)  |  %.2f fps  |  ETA %s",
+                    frame_idx, total_frames, pct, avg_fps, _format_eta(remaining),
+                )
+                last_log_time = now
+    finally:
+        cap.release()
+        grid_writer.release()
+        anon_writer.release()
+
+    total_time = time.perf_counter() - t_start
+    avg_fps = frame_idx / total_time if total_time > 0 else 0
     logging.info(
-        "Pipeline finished in %.3fs  (face_detector=%.3fs, depth_estimator=%.3fs)",
-        total,
-        timing["face_detector"],
-        timing["depth_estimator"],
+        "Done: %d frames in %s (avg %.2f fps)",
+        frame_idx, _format_eta(total_time), avg_fps,
     )
-    logging.info("Detected %d face(s).", len(faces))
-
-    # --- Depth-filter faces (keep foreground only) -----------------------------
-    depth_threshold = cfg_anon.get("depth_threshold", 0.4)
-    fg_faces = _filter_foreground_faces(faces, depth_map, depth_threshold)
-    logging.info("Foreground faces: %d / %d (threshold=%.2f)", len(fg_faces), len(faces), depth_threshold)
-
-    # --- Anonymize foreground faces -------------------------------------------
-    anon_img = anonymizer.anonymize(image, fg_faces)
-
-    # --- Compose 2x2 grid and save -------------------------------------------
-    grid = compose_grid(image, faces, depth_map, anon_img, depth_threshold)
-    output_path = cfg_out.get("output_path", "output.jpg")
-    display = cfg_out.get("display", False)
-    save_and_show(grid, output_path, display=display)
-    logging.info("Output grid saved to %s", output_path)
+    logging.info("Grid video  -> %s", grid_path)
+    logging.info("Anon video  -> %s", anon_path)
 
 
 if __name__ == "__main__":
