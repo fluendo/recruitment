@@ -72,7 +72,7 @@ Lastly, in order to verify improvements are real and the model is not overfittin
 
 
 
-#### Q4: 4. Two training runs with the same configuration produce noticeably different results. One model is stable but less accurate; another is more accurate but produces jittery keypoints and inconsistent hit timing. Provide a reasoning to decide which model is actually better for production. What additional tests, metrics, and scenario-based evaluations would you design to support the decision?
+#### Q4: Two training runs with the same configuration produce noticeably different results. One model is stable but less accurate; another is more accurate but produces jittery keypoints and inconsistent hit timing. Provide a reasoning to decide which model is actually better for production. What additional tests, metrics, and scenario-based evaluations would you design to support the decision?
 
 This decision is not as automatic as saying "the one more accurate is better in production". A more accurate model may still produce a worse experience for the user if hit timing jumps between nearer frames, or jittery keypoints can create a feeling of false motion. If the more accurate model has only a small accuracy gain but significantly worse jitter and unstable timing, I would choose the stable model for production, provided that minimum constrains are accomplished. Otherwise, if the accurate model is clearly better, then I would keep it and try to solve the instability, for instance by add some post-processing.
 
@@ -90,15 +90,15 @@ Besides that, we could compute when jittery keypoints between frames leads us to
 
 ---
 
-#### Q5: 5. Which model would you propose for this application? Why?
+#### Q5: Which model would you propose for this application? Why?
 
 As for other question along this test, the lower the computational cost the better. With that assumption in mind, and some other's commented along this Q2 as the importance of wrists and elbows for classifying hit-events, I would suggest a pipeline that manages an acceptable trade-off between accuracy and computational cost.
 
 1. A first lightweight player detector previous to the pose estimator. I would suggest YOLOv8n restricted to person detection. 
 
-2. A small top-down pose model. The decision of using a top-down model instead of a bottom-up is that the first one could provide us with a better-quality set of keypoints specially for upper-body ones, as far as I am concerned. For this step I would suggest using a small RTMPose, as it can be a good balance between accuracy and speed.
+2. A small top-down pose model. The decision of using a top-down model instead of a bottom-up is that the first one could provide us with a better-quality set of keypoints specially for upper-body ones, as far as I am concerned. For this step I would suggest using a small RTMPose ([https://arxiv.org/abs/2303.07399](https://arxiv.org/abs/2303.07399)), as it can be a good balance between accuracy and speed.
 
-3. A temporal hit-event classifier from sequences of keypoints over a sliding window. I found a good option for this step in a lightweight ST-GCN (Spatial-Temporal Graph Convolutional Network), which treats the body as a skeleton graph and naturally models relationships. In order to be more specific, keypoints would be in 2D, and for the sliding window we could consider 15-20 frames.
+3. A temporal hit-event classifier from sequences of keypoints over a sliding window. I found a good option for this step in a lightweight ST-GCN (Spatial-Temporal Graph Convolutional Network) ([https://arxiv.org/abs/1801.07455](https://arxiv.org/abs/1801.07455)), which treats the body as a skeleton graph and naturally models relationships. In order to be more specific, keypoints would be in 2D, and for the sliding window we could consider 15-20 frames.
 
 With this pipeline, if joint jitter appears, it could be introduced a 4th step of post-processing, where we could add temporal smoothing for keypoint trajectories across consecutive frames.
 

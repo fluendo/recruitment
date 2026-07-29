@@ -42,7 +42,7 @@ To end up with this question, if a depth-estimation module is added, it could be
 
 ---
 
-###### Q3. Imagine we have this case: our face detection system does not detect properly (bad accuracy) dark-skins nor bald-people; how would you improve system accuracy?
+##### Q3. Imagine we have this case: our face detection system does not detect properly (bad accuracy) dark-skins nor bald-people; how would you improve system accuracy?
 
 This case could be derived from many possibilities related to our data. Firstly, there could be a lack of representative training samples for these collectives. If not, then features could rely too havily in specific visual aspects that indirectly harm the predictions for bald and dark-skin people. There is also a possibility that the architecture has an inherent bias and it is not a data problem.
 
