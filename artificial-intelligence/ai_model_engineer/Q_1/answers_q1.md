@@ -128,6 +128,10 @@ It has been mentioned above, but all system parameters are encompassed in a sing
 
 To test if the system works, I have recorded myself a short video where I stay in a near-plane and then in a further one, to see how does it perform. Also, I selected a setup where a structure in the middle generates slight occlusion in some frames when I walk by it. For selecting the threshold as discussed before I'd need to build a dataset. Given that, I haven't for this simple test, the threshold has been arbitrary set to 0.4, so it is slightly less strict than a 0.5 (which would be half-division more or less). Within the output files I submit, there are pair of tests with more restrictive thresholds: 0.6 and 0.8.
 
+As I haven't uploaded these short videos to the git repo, I provide you with a shared Google Drive folder link where you can find the files I have been referring to along the answer.
+
+Link: https://drive.google.com/drive/folders/1SOQy_etjulMXYWDB25kpmtDygcG84Dpj?usp=sharing
+
 Note: For a dataset I would use DVC. However, given that I just processed a single video, I have not used it. Videos won't be uploaded to Git neither, but delivered in a compressed file through the answering mail.
 
 ##### Next steps
