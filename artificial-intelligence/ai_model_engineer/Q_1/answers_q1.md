@@ -132,7 +132,7 @@ Note: For a dataset I would use DVC. However, given that I just processed a sing
 
 ##### Next steps
 
-I am aware an evaluation framework is missing in this snippet. However, at a first glance of the output generated, I detected a visual aspect that could be striaghtforward solved. I included a screenshot of the corresponding problem to be adressed within the output files: The depth mask created noisy boundaries around my silhouette. Some parts of my body were being blurred, so that incorrectly classified. Within the outputs, I attach in the same folder the grid with the changes applied, named output_grid_v2.mp4 
+I am aware an evaluation framework is missing in this snippet. However, at a first glance of the output generated, I detected a visual aspect that could be striaghtforward solved. I included a screenshot of the corresponding problem to be adressed: The depth mask created noisy boundaries around my silhouette. Some parts of my body were being blurred, so that incorrectly classified. Within the outputs, I attach in the same folder the grid with the changes applied, named output_grid_v2.mp4 
 
 <p align="center">
     <img src="../imagery/screenshot_error.png" alt="<Screenshot Error>" />
