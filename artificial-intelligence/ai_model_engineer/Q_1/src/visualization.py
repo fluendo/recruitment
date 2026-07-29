@@ -1,61 +1,78 @@
-"""Visualization utilities for pipeline results.
-
-Provides helpers to draw face detections on a frame, colorize depth maps,
-blur background regions based on depth, and compose a 2x2 diagnostic grid.
-"""
+"""Visualization utilities for pipeline results"""
 
 from __future__ import annotations
 
 import cv2
 import numpy as np
 
-_BOX_COLOR = (0, 255, 0)  # BGR green
-_TEXT_COLOR = (0, 255, 0)
-_BOX_THICKNESS = 2
 _FONT = cv2.FONT_HERSHEY_SIMPLEX
-_FONT_SCALE = 0.5
+
+_DEFAULTS = {
+    "box_color": (0, 255, 0),
+    "text_color": (0, 255, 0),
+    "box_thickness": 2,
+    "font_scale": 0.5,
+    "bg_blur_kernel_size": 151,
+}
+
+_cfg: dict = {}
+
+def configure(cfg: dict) -> None:
+    """Store the visualization config. Missing keys fall back to _DEFAULTS."""
+
+    _cfg.update(cfg)
+
+
+def _get(key: str):
+    """Get a config value by key, falling back to _DEFAULTS if not found."""
+    
+    val = _cfg.get(key, _DEFAULTS[key])
+    return tuple(val) if isinstance(val, list) else val
 
 
 def draw_faces(image: np.ndarray, faces: list[dict]) -> np.ndarray:
-    """Draw bounding boxes and confidence labels on a copy of *image*.
+    """Draw bounding boxes and confidence labels on a copy of image.
 
-    Parameters
-    ----------
-    image : np.ndarray
+    Params
+
+    - image : np.ndarray
         BGR image.
-    faces : list[dict]
-        Detections as returned by :meth:`FaceDetector.detect`.
+    - faces : list[dict]
+        Detections as returned by FaceDetector.detect.
 
-    Returns
-    -------
-    np.ndarray
-        Annotated copy of the input image.
+    Output
+
+    - np.ndarray
+        Copy of the input image with bounding boxes and confidence labels.
     """
+
     canvas = image.copy()
     for face in faces:
         x1, y1, x2, y2 = face["bbox"]
         conf = face["confidence"]
-        cv2.rectangle(canvas, (x1, y1), (x2, y2), _BOX_COLOR, _BOX_THICKNESS)
+        cv2.rectangle(canvas, (x1, y1), (x2, y2), _get("box_color"), _get("box_thickness"))
         label = f"{conf:.2f}"
-        (tw, th), _ = cv2.getTextSize(label, _FONT, _FONT_SCALE, 1)
+        font_scale = _get("font_scale")
+        (tw, th), _ = cv2.getTextSize(label, _FONT, font_scale, 1)
         label_y = max(y1 - 6, th + 4)
-        cv2.putText(canvas, label, (x1, label_y), _FONT, _FONT_SCALE, _TEXT_COLOR, 1)
+        cv2.putText(canvas, label, (x1, label_y), _FONT, font_scale, _get("text_color"), 1)
     return canvas
 
 
 def colorize_depth(depth_map: np.ndarray) -> np.ndarray:
-    """Convert a ``[0, 1]`` depth map to a BGR heatmap using INFERNO.
+    """Convert a [0, 1] depth map to a BGR heatmap using INFERNO colormap.
 
-    Parameters
-    ----------
-    depth_map : np.ndarray
-        Float32 array of shape ``(H, W)`` in ``[0, 1]``.
+    Params
+    
+    - depth_map : np.ndarray
+        Float32 array of shape (H, W) in [0, 1].
 
-    Returns
-    -------
-    np.ndarray
+    Output
+
+    - np.ndarray
         BGR uint8 image of the same spatial dimensions.
     """
+
     depth_uint8 = (depth_map * 255).astype(np.uint8)
     return cv2.applyColorMap(depth_uint8, cv2.COLORMAP_INFERNO)
 
@@ -73,27 +90,28 @@ def refine_depth_mask(
     expand the foreground boundary), and an optional Gaussian feather (to
     produce soft edges for alpha-blending compositing).
 
-    Parameters
-    ----------
-    depth_map : np.ndarray
-        Float32 array of shape ``(H, W)`` in ``[0, 1]``.
-    threshold : float
-        Depth value separating foreground (>= threshold) from background.
-    close_ksize : int
-        Kernel size for morphological closing (fills small holes).
-    dilate_ksize : int
-        Kernel size for dilation (expands foreground contour outward).
-    feather_ksize : int
-        Gaussian kernel size applied to the mask for soft edges.
-        Set to ``0`` to disable feathering and keep a hard mask.
+    Params
 
-    Returns
-    -------
-    np.ndarray
-        Float32 mask of shape ``(H, W)`` in ``[0, 1]``.  Values near 1
+    - depth_map : np.ndarray
+        Float32 array of shape (H, W) in [0, 1].
+    - threshold : float
+        Depth value separating foreground (>= threshold) from background.
+    - close_ksize : int
+        Kernel size for morphological closing (fills small holes).
+    - dilate_ksize : int
+        Kernel size for dilation (expands foreground contour outward).
+    - feather_ksize : int
+        Gaussian kernel size applied to the mask for soft edges.
+        Set to 0 to disable feathering and keep a hard mask.
+
+    Output
+    
+    - np.ndarray
+        Float32 mask of shape (H, W) in [0, 1].  Values near 1
         are foreground; values near 0 are background.  When feathering is
         enabled the mask has smooth gradients at object boundaries.
     """
+
     mask = (depth_map >= threshold).astype(np.uint8) * 255
 
     close_kernel = cv2.getStructuringElement(
@@ -117,7 +135,7 @@ def blur_background(
     image: np.ndarray,
     depth_map: np.ndarray,
     threshold: float,
-    kernel_size: int = 151,
+    kernel_size: int | None = None,
     close_ksize: int = 15,
     dilate_ksize: int = 7,
     feather_ksize: int = 21,
@@ -129,28 +147,31 @@ def blur_background(
     cleanup and feathering is used so that foreground silhouettes are not
     cut by noisy depth boundaries.
 
-    Parameters
-    ----------
-    image : np.ndarray
+    Params
+    
+    - image : np.ndarray
         BGR image.
-    depth_map : np.ndarray
-        Normalised depth map ``(H, W)`` in ``[0, 1]``.
-    threshold : float
+    - depth_map : np.ndarray
+        Normalised depth map (H, W) in [0, 1].
+    - threshold : float
         Depth value separating foreground (>= threshold) from background.
-    kernel_size : int
+    - kernel_size : int
         Gaussian kernel size for the background blur.
-    close_ksize : int
-        Passed to :func:`refine_depth_mask`.
-    dilate_ksize : int
-        Passed to :func:`refine_depth_mask`.
-    feather_ksize : int
-        Passed to :func:`refine_depth_mask`.
+    - close_ksize : int
+        Passed to refine_depth_mask.
+    - dilate_ksize : int
+        Passed to refine_depth_mask.
+    - feather_ksize : int
+        Passed to refine_depth_mask.
 
-    Returns
-    -------
-    np.ndarray
-        BGR image with background blurred.
+    Output
+    
+    - np.ndarray
+        Copy of the input image with background blurred.
     """
+
+    if kernel_size is None:
+        kernel_size = _get("bg_blur_kernel_size")
     if kernel_size % 2 == 0:
         kernel_size += 1
 
@@ -171,35 +192,28 @@ def compose_grid(
 ) -> np.ndarray:
     """Build a 2x2 grid with four diagnostic panels.
 
-    Layout::
+    Params
 
-        ┌──────────────────┬──────────────────┐
-        │ Face detections  │ Depth map        │
-        ├──────────────────┼──────────────────┤
-        │ Background blur  │ Anonymized       │
-        └──────────────────┴──────────────────┘
-
-    Parameters
-    ----------
-    image : np.ndarray
-        Original BGR image.
-    faces : list[dict]
+    - image : np.ndarray
+        BGR image.
+    - faces : list[dict]
         All face detections (before depth filtering).
-    depth_map : np.ndarray
-        Normalised depth map ``(H, W)`` in ``[0, 1]``.
-    anon_image : np.ndarray
+    - depth_map : np.ndarray
+        Normalised depth map (H, W) in [0, 1].
+    - anon_image : np.ndarray
         Image with foreground faces anonymized.
-    depth_threshold : float
+    - depth_threshold : float
         Threshold used for depth filtering (shown on the background-blur panel).
     mask_cfg : dict | None
-        Optional dict with keys ``close_ksize``, ``dilate_ksize``,
-        ``feather_ksize`` forwarded to :func:`blur_background`.
+        Optional dict with keys close_ksize, dilate_ksize,
+        feather_ksize forwarded to blur_background.
 
-    Returns
-    -------
-    np.ndarray
-        Combined 2x2 BGR image.
+    Output
+    
+    - np.ndarray
+        Combined 2x2 BGR image with diagnostic panels.
     """
+
     tl = draw_faces(image, faces)
     tr = colorize_depth(depth_map)
     bl = blur_background(image, depth_map, depth_threshold, **(mask_cfg or {}))
@@ -218,7 +232,20 @@ def compose_grid(
 def _label(
     image: np.ndarray,
     text: str,
-    color: tuple[int, int, int] = _TEXT_COLOR,
+    color: tuple[int, int, int] | None = None,
 ) -> None:
-    """Draw a header label in-place on the top-left corner of *image*."""
+    """Draw a header label in-place on the top-left corner of image
+
+    Params
+
+    - image : np.ndarray
+        BGR image.
+    - text : str
+        Text to draw.
+    - color : tuple[int, int, int]
+        Color of the text in BGR.
+    """
+
+    if color is None:
+        color = _get("text_color")
     cv2.putText(image, text, (10, 25), _FONT, 0.7, color, 2)

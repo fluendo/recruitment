@@ -1,19 +1,12 @@
-"""Monocular depth estimation module using MiDaS.
+"""Monocular Depth Estimation module using MiDaS.
 
-This module wraps the Intel ISL *MiDaS* family of models (loaded through
-``torch.hub``) behind a simple interface.  Model weights are downloaded
-automatically on first use by PyTorch Hub.
+This module wraps the MiDaS_small model (v2.1 with EfficientNet-Lite3 backbone).
+Model weights are downloaded automatically on first use by PyTorch Hub.
 
-The default variant is ``MiDaS_small`` (v2.1, EfficientNet-Lite3 backbone)
-which offers the best speed for real-time use-cases.  Heavier alternatives
-(``DPT_Hybrid``, ``DPT_Large``) can be selected via the *model_type*
-parameter when higher accuracy is needed.
-
-Typical usage:
+Usage:
 
     estimator = DepthEstimator()
     depth_map = estimator.estimate(cv2.imread("photo.jpg"))
-    # depth_map is a float32 array of shape (H, W) in [0, 1]
 """
 
 from __future__ import annotations
@@ -26,31 +19,28 @@ import torch
 
 logger = logging.getLogger(__name__)
 
-_VALID_MODELS = {"MiDaS_small", "DPT_Hybrid", "DPT_Large"}
+_VALID_MODELS = {"MiDaS_small"}
 
 
 def _resolve_device(device: str) -> torch.device:
-    """Pick the best available device when *device* is ``'auto'``."""
+    """Pick the best available device"""
     if device != "auto":
         return torch.device(device)
     if torch.cuda.is_available():
         return torch.device("cuda")
-    if hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
-        return torch.device("mps")
     return torch.device("cpu")
 
 
 class DepthEstimator:
     """Estimate per-pixel relative depth from a single image using MiDaS.
 
-    Parameters
-    ----------
-    model_type : str
-        One of ``'MiDaS_small'`` (fastest), ``'DPT_Hybrid'`` (balanced), or
-        ``'DPT_Large'`` (most accurate).
-    device : str
-        ``'auto'`` (default) picks CUDA > MPS > CPU.  Any explicit PyTorch
-        device string is also accepted.
+    Params
+
+    - model_type : str
+        For this practical example MiDaS small, but extendable for future 
+        alternative architectures
+    - device : str
+        auto (default) picks CUDA > CPU
     """
 
     def __init__(
@@ -58,6 +48,7 @@ class DepthEstimator:
         model_type: str = "MiDaS_small",
         device: str = "auto",
     ) -> None:
+
         if model_type not in _VALID_MODELS:
             raise ValueError(
                 f"Unknown model_type '{model_type}'. Choose from {_VALID_MODELS}."
@@ -80,19 +71,18 @@ class DepthEstimator:
 
     @torch.no_grad()
     def estimate(self, image: np.ndarray) -> np.ndarray:
+
         """Compute a relative depth map for a single image.
 
-        Parameters
-        ----------
-        image : np.ndarray
-            BGR image as returned by ``cv2.imread``.
+        Params
 
-        Returns
-        -------
-        np.ndarray
-            Float32 array of shape ``(H, W)`` with values in ``[0, 1]``.
-            **Higher values correspond to points closer to the camera**
-            (MiDaS outputs inverse depth, which we normalise here).
+        - image : np.ndarray
+            BGR image as returned by cv2.imread.
+
+        Output
+
+        - np.ndarray
+            Float32 array of shape (H, W) with map values in [0, 1].
         """
         h, w = image.shape[:2]
 

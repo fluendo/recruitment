@@ -1,8 +1,7 @@
 models/
+outputs/*
 __pycache__/
 *.pyc
 *.pyo
 .venv/
-outputs/*
-data/*.pdf
-data/*.mp4
+*.mp4

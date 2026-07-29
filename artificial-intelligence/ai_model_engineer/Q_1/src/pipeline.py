@@ -1,23 +1,12 @@
-"""Pipeline orchestrator that runs processing modules in parallel.
+"""Runs multiple processing modules on an image at the same time using threads.
 
-The :class:`Pipeline` accepts any number of named *modules* (callables that
-take an image and return a result) and executes them concurrently using a
-:class:`~concurrent.futures.ThreadPoolExecutor`.  PyTorch releases the GIL
-during tensor computation, so thread-level parallelism provides real speed-up
-when modules are GPU-bound.
-
-Currently wired with :class:`FaceDetector` and :class:`DepthEstimator`, but
-the design is intentionally generic so that new modules (e.g. anonymiser, ReID)
-can be registered without changing the orchestration logic.
-
-Typical usage:
+Usage::
 
     pipeline = Pipeline(
         face_detector=FaceDetector(),
         depth_estimator=DepthEstimator(),
     )
     results = pipeline.process(image)
-    # results == {"face_detector": [...], "depth_estimator": np.ndarray}
 """
 
 from __future__ import annotations
@@ -35,13 +24,12 @@ logger = logging.getLogger(__name__)
 class Pipeline:
     """Run multiple image-processing modules in parallel on a single image.
 
-    Parameters
-    ----------
-    **modules
+    Params
+
+    - modules
         Keyword arguments where each key is a module name and each value is a
-        callable with the signature ``(image: np.ndarray) -> Any``.  Typical
-        entries are ``face_detector=detector.detect`` and
-        ``depth_estimator=estimator.estimate``.
+        callable with the signature (image: np.ndarray) -> Any.  Current entries are 
+        face_detector=detector.detect and  depth_estimator=estimator.estimate.
     """
 
     def __init__(self, **modules: Callable[[np.ndarray], Any]) -> None:
@@ -50,14 +38,15 @@ class Pipeline:
         self._modules = modules
 
     def process(self, image: np.ndarray) -> dict[str, Any]:
-        """Process *image* through every registered module in parallel.
+        """Process image through every registered module in parallel.
 
-        Returns
-        -------
-        dict[str, Any]
-            Mapping of ``module_name -> module_output``.  The dict also
-            contains a ``'_timing'`` key with per-module wall-clock seconds.
+        Output
+
+        - dict[str, Any]
+            Mapping of module_name -> module_output.  The dict also
+            contains a '_timing' key with per-module wall-clock seconds.
         """
+        
         results: dict[str, Any] = {}
         timing: dict[str, float] = {}
 

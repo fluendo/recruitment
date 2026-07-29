@@ -1,10 +1,8 @@
 """Face detection module using YOLOv8 trained on WIDER FACE.
 
-This module wraps a YOLOv8n-face model (community-trained on the WIDER FACE
-dataset) behind a simple interface.  The pretrained weights are auto-downloaded
-on first use so no manual setup is required.
+The pretrained weights are auto-downloaded on first use so no manual setup is required.
 
-Typical usage:
+Usage:
 
     detector = FaceDetector()
     faces = detector.detect(cv2.imread("photo.jpg"))
@@ -15,7 +13,6 @@ Typical usage:
 from __future__ import annotations
 
 import logging
-import os
 from pathlib import Path
 from urllib.request import urlretrieve
 
@@ -32,20 +29,20 @@ _MODEL_URL = (
 
 
 def _resolve_device(device: str) -> str:
-    """Pick the best available device when *device* is ``'auto'``."""
+    """Pick the best available device"""
+    
     if device != "auto":
         return device
     import torch
 
     if torch.cuda.is_available():
         return "cuda"
-    if hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
-        return "mps"
     return "cpu"
 
 
 def _ensure_model(model_path: Path) -> Path:
     """Download the YOLO face model if it does not exist yet."""
+
     if model_path.exists():
         return model_path
     model_path.parent.mkdir(parents=True, exist_ok=True)
@@ -59,15 +56,13 @@ class FaceDetector:
     """Detect faces in an image using a YOLOv8n-face model.
 
     Parameters
-    ----------
-    model_path : str | Path
-        Filesystem path to the ``.pt`` weights file.  When the default is used
-        and the file is missing it will be fetched automatically.
-    conf_threshold : float
+    
+    - model_path : str | Path
+        Path to the .pt weights file. 
+    - conf_threshold : float
         Minimum confidence score to keep a detection (0-1).
-    device : str
-        ``'auto'`` (default) picks CUDA > MPS > CPU.  Any explicit PyTorch
-        device string (``'cpu'``, ``'cuda:0'``, …) is also accepted.
+    - device : str
+        auto (default) picks CUDA > CPU. 
     """
 
     def __init__(
@@ -76,6 +71,7 @@ class FaceDetector:
         conf_threshold: float = 0.25,
         device: str = "auto",
     ) -> None:
+
         if model_path is None:
             model_path = _DEFAULT_MODEL_DIR / _DEFAULT_MODEL_NAME
         model_path = Path(model_path)
@@ -89,18 +85,19 @@ class FaceDetector:
     def detect(self, image: np.ndarray) -> list[dict]:
         """Run face detection on a single image.
 
-        Parameters
-        ----------
-        image : np.ndarray
-            BGR image as returned by ``cv2.imread``.
+        Params
 
-        Returns
-        -------
-        list[dict]
+        - image : np.ndarray
+            BGR image as returned by cv2.imread.
+
+        Output
+        
+        - list[dict]
             Each dict has:
-            - ``bbox``  – ``[x1, y1, x2, y2]`` pixel coordinates (``list[int]``).
-            - ``confidence`` – detection confidence (``float``).
+            - bbox  - [x1, y1, x2, y2] pixel coordinates (list[int]).
+            - confidence - detection confidence (float).
         """
+        
         results = self._model.predict(
             source=image,
             conf=self._conf,

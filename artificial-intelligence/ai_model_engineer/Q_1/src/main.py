@@ -4,11 +4,7 @@ Run with::
 
     python -m src.main --video path/to/video.mp4
 
-All system parameters are read from a YAML config file (default:
-``config.yaml``).  Only ``--video`` and ``--config`` are accepted as CLI
-arguments.
-
-Use ``--help`` to see available options.
+--video and --config are accepted as CLI arguments.
 """
 
 from __future__ import annotations
@@ -27,6 +23,7 @@ from src.anonymizer import Anonymizer
 from src.depth_estimator import DepthEstimator
 from src.face_detector import FaceDetector
 from src.pipeline import Pipeline
+from src import visualization
 from src.visualization import compose_grid, refine_depth_mask
 
 
@@ -40,9 +37,10 @@ def _filter_foreground_faces(
     values so that noisy pixels at bbox boundaries do not cause
     foreground faces to be dropped.
 
-    A face is kept when the mean mask value inside its bbox is >= 0.5,
-    meaning more than half of its pixels are classified as foreground.
+    A face is kept when its bbox has more than half of its pixels are 
+    classified as foreground.
     """
+
     foreground = []
     for face in faces:
         x1, y1, x2, y2 = face["bbox"]
@@ -53,6 +51,7 @@ def _filter_foreground_faces(
 
 
 def _build_parser() -> argparse.ArgumentParser:
+
     parser = argparse.ArgumentParser(
         description=(
             "Run face detection (YOLO) and depth estimation (MiDaS) "
@@ -78,13 +77,14 @@ def _build_parser() -> argparse.ArgumentParser:
 
 def _load_config(config_path: Path) -> dict:
     """Read and return the YAML configuration, with basic validation."""
+
     if not config_path.is_file():
         sys.exit(f"Error: config file not found at '{config_path}'")
 
     with open(config_path, "r") as fh:
         cfg = yaml.safe_load(fh)
 
-    required_sections = ["face_detector", "depth_estimator", "anonymizer", "pipeline", "output"]
+    required_sections = ["face_detector", "depth_estimator", "anonymizer", "visualization", "pipeline", "output"]
     for section in required_sections:
         if section not in cfg:
             sys.exit(f"Error: missing '{section}' section in {config_path}")
@@ -94,6 +94,7 @@ def _load_config(config_path: Path) -> dict:
 
 def _open_video(video_path: Path) -> tuple[cv2.VideoCapture, int, float, int, int]:
     """Open a video file and return (capture, total_frames, fps, width, height)."""
+
     cap = cv2.VideoCapture(str(video_path))
     if not cap.isOpened():
         sys.exit(f"Error: could not open video at '{video_path}'")
@@ -113,7 +114,8 @@ def _create_writer(
     width: int,
     height: int,
 ) -> cv2.VideoWriter:
-    """Create and return a VideoWriter, exiting on failure."""
+    """Create and return a VideoWriter."""
+
     fourcc = cv2.VideoWriter_fourcc(*codec)
     writer = cv2.VideoWriter(str(path), fourcc, fps, (width, height))
     if not writer.isOpened():
@@ -123,6 +125,7 @@ def _create_writer(
 
 def _format_eta(seconds: float) -> str:
     """Return a human-readable ETA string."""
+
     m, s = divmod(int(seconds), 60)
     h, m = divmod(m, 60)
     if h > 0:
@@ -131,6 +134,7 @@ def _format_eta(seconds: float) -> str:
 
 
 def main(argv: list[str] | None = None) -> None:
+
     args = _build_parser().parse_args(argv)
 
     logging.basicConfig(
@@ -144,26 +148,32 @@ def main(argv: list[str] | None = None) -> None:
     if not video_path.is_file():
         sys.exit(f"Error: video not found at '{video_path}'")
 
-    # --- Open input video -----------------------------------------------------
+    # -----------------------------------------------------
+    # Open input video
     cap, total_frames, fps, width, height = _open_video(video_path)
     logging.info(
         "Video opened: %s (%dx%d, %.2f fps, %d frames)",
         video_path.name, width, height, fps, total_frames,
     )
 
-    # --- Read config sections -------------------------------------------------
+    # -------------------------------------------------
+    # Read config sections 
     cfg_face = cfg["face_detector"]
     cfg_depth = cfg["depth_estimator"]
     cfg_anon = cfg["anonymizer"]
     cfg_pipe = cfg["pipeline"]
     cfg_out = cfg["output"]
 
+    cfg_vis = cfg["visualization"]
     cfg_mask = cfg.get("depth_mask", {})
+
+    visualization.configure(cfg_vis)
 
     device = cfg_pipe.get("device", "auto")
     depth_threshold = cfg_anon.get("depth_threshold", 0.4)
 
-    # --- Initialise modules ---------------------------------------------------
+    # ---------------------------------------------------
+    # Initialise modules 
     detector = FaceDetector(
         model_path=cfg_face.get("model_path"),
         conf_threshold=cfg_face.get("confidence_threshold", 0.25),
@@ -185,7 +195,8 @@ def main(argv: list[str] | None = None) -> None:
         depth_estimator=estimator.estimate,
     )
 
-    # --- Create output video writers ------------------------------------------
+    # ------------------------------------------
+    # Create output video writers 
     codec = cfg_out.get("codec", "mp4v")
     grid_path = cfg_out.get("grid_path", "output_grid.mp4")
     anon_path = cfg_out.get("anonymized_path", "output_anon.mp4")
@@ -193,7 +204,8 @@ def main(argv: list[str] | None = None) -> None:
     grid_writer = _create_writer(grid_path, codec, fps, width * 2, height * 2)
     anon_writer = _create_writer(anon_path, codec, fps, width, height)
 
-    # --- Frame loop -----------------------------------------------------------
+    # ------------------------------------------
+    # Frame loop 
     logging.info("Processing frames (offline, device=%s) ...", device)
     t_start = time.perf_counter()
     last_log_time = t_start

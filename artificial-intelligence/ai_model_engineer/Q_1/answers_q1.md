@@ -100,7 +100,7 @@ A final user would like to configure easily and understand what is happening in 
 
 #### Q7. Provide a code snippet (practical example) on how would you implement any of these applications: reidentification or depth estimation, for face anonymization.
 
-*I decided on depth estimation because I worked on ReID for my TFG. I attach the presentation of my work that I prepared back then with the solution, in case you'd like to have a look. 
+*I decided on depth estimation because I worked on ReID for my TFG. I attach the presentation of my work that I prepared back then inside the /additional_files folder, in case you'd like to have a look. 
 
 ##### Description
 
@@ -126,18 +126,18 @@ For an input video, a clean anonymized video and a 2x2 diagnostic grid are gener
 
 It has been mentioned above, but all system parameters are encompassed in a single yaml file, so the behaviour can be changed easily without modifying the code.
 
-To test if the system works, I have recorded myself a short video where I stay in a near-plane and then in a further one, to see how does it perform. Also, I selected a setup where a structure in the middle generates slight occlusion in some frames when I walk by it.
+To test if the system works, I have recorded myself a short video where I stay in a near-plane and then in a further one, to see how does it perform. Also, I selected a setup where a structure in the middle generates slight occlusion in some frames when I walk by it. For selecting the threshold as discussed before I'd need to build a dataset. Given that, I haven't for this simple test, the threshold has been arbitrary set to 0.4, so it is slightly less strict than a 0.5 (which would be half-division more or less). Within the output files I submit, there are pair of tests with more restrictive thresholds: 0.6 and 0.8.
 
 Note: For a dataset I would use DVC. However, given that I just processed a single video, I have not used it. Videos won't be uploaded to Git neither, but delivered in a compressed file through the answering mail.
 
 ##### Next steps
 
-I am aware an evaluation framework is missing in this snippet. However, at a first glance of the output generated, I detected a visual aspect that could be striaghtforward solved. I included a screenshot of the corresponding problem to be adressed: The depth mask created noisy boundaries around my silhouette. Some parts of my body were being blurred, so that incorrectly classified. Within the outputs, I attach in the same folder the grid with the changes applied, named output_grid_v2.mp4 
+I am aware an evaluation framework is missing in this snippet. However, at a first glance of the output generated, I detected a visual aspect that could be striaghtforward solved. I included a screenshot of the corresponding problem to be adressed within the output files: The depth mask created noisy boundaries around my silhouette. Some parts of my body were being blurred, so that incorrectly classified. Within the outputs, I attach in the same folder the grid with the changes applied, named output_grid_v2.mp4 
 
 <p align="center">
     <img src="../imagery/screenshot_error.png" alt="<Screenshot Error>" />
 </p>
 
-With the aim of having an evaluation, we should be recording new videos, annotating them and processing them through our pipeline, so we obtain metrics as Precision, Recall, IoU, Anonymization rates, Depth accuracy... This step has not been carried out at this point but it is the inmediate next one.
+With the aim of having an evaluation, we should be recording new videos, annotating them and processing them through our pipeline, so we obtain metrics as Precision, Recall, IoU, Anonymization rates, Depth accuracy... This step has not been carried out at this point but it would be the inmediate next one.
 
 Measuring the latency both overall and per-module is crucial as well if we think about real-time environment. This single processing is offline, but for a hypothetic final product are primordial. As well, unity tests for each one has not been included neither and they should.
