@@ -86,7 +86,7 @@ class OpenCVDepthAnonymizer:
         # Detect Faces using YOLO
         detected_faces = self.detect_faces(frame)
 
-        # Evaluate Depth Per Face (median) and Blur Only Background Faces
+        # Compute median depth per face and blur only background faces
         for (x1, y1, x2, y2) in detected_faces:
             # Ensure coordinates stay within valid frame boundaries
             x1, y1 = max(0, x1), max(0, y1)
@@ -100,7 +100,7 @@ class OpenCVDepthAnonymizer:
                 
             avg_face_depth = np.median(face_depth_region)
             if avg_face_depth > self.distance_threshold:
-                # BACKGROUND FACE -> Blur only specific face ROI
+                # BACKGROUND FACE -> Blur only specific face region of interest (ROI)
                 face_roi = output_frame[y1:y2, x1:x2]
                 blurred_face = cv2.GaussianBlur(face_roi, self.blur_kernel, 30)
                 output_frame[y1:y2, x1:x2] = blurred_face

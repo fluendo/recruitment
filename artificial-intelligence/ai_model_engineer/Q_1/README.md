@@ -47,7 +47,7 @@ In contrast to stereo camera setups, monocular estimation works with any standar
 
 Once the depth map is computed, the system could apply a specific depth threshold: any face detected beyond that distance boundary (the background) will be smoothly blurred out, while foreground subjects and faces will remain crisp and clear.
 
-In orther to imporve the pipeline and make it more efficient, we could apply several optimization strategies such as:
+In order to imporve the pipeline and make it more efficient, we could apply several optimization strategies such as:
 - Input Resolution Downscaling: Depth and detection models do not require ultra high resolutions to accurately figure out spatial layers or locate faces. By downscaling input video frames before feeding them into the depth estimation network, we could imporve our inference speed without compromising background/foreground split quality.
 - Tracking Algorithms: Just like with face Re-ID, running depth estimation on every single frame would increase the complexity of our model. To keep performance high, we could tie depth calculations directly into our object tracking workflow. Instead of generating a new depth map constantly, the system could compute them selectively; such as on video stream I-frames, when a new subject enters the scene, or during periodic random checks.
 
@@ -85,3 +85,5 @@ Since the same system might be deployed for users with slightly different privac
 - Simple face whitelisting: giving users a straightforward dashboard or interface to quickly add a new authorized face to the system without needing data engineering skills.
 
 7. (EXTRA) Provide a code snippet (practical example) on how would you implement any of these applications: reidentification or depth estimation, for face anonymization.
+
+An additional Python file named Q1_extra.py has been added conteining the practical example of how I would use depth estimation for face anonymization. 
