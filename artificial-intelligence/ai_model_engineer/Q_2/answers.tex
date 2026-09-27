@@ -1,0 +1,208 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{hyperref}
+
+\hypersetup{colorlinks=true, urlcolor=blue}
+
+\title{Question \#2: Analytical Reasoning \\ Pose Estimation for Padel Hits}
+\author{Alejandro Campayo}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section*{Q1. Root causes of validation-to-new-club performance drop}
+
+Strong performance on validation and a failure in a new club means that the difference
+between \textbf{validation and training data} is smaller than the difference between
+\textbf{training and real deployment}: there is a \textbf{domain shift}. What worries me
+most is that the validation metrics do not show it, which points to \textbf{data leakage}:
+if validation was recorded in the same club or with the same camera angles as training, the
+model has \textbf{overfitted to one particular setup}.
+
+To isolate the problem:
+
+\begin{itemize}
+  \item \textbf{Training vs.\ validation.} They should be \textbf{two genuinely independent
+    subsets}. If they are not, validation loss tracks training loss very closely and we cannot
+    tell when overfitting happens or whether the run is healthy.
+  \item \textbf{Validation vs.\ test.} Look for what changes between them: \textbf{scale,
+    perspective, FoV, resolution, color of the ball / field}, etc.
+  \item \textbf{Probing.} A cheap check: take the features extracted by the trained model and
+    train a \textbf{tiny classifier} to predict what I suspect is breaking it (the padel
+    field, the camera resolution, the perspective). If that classifier is accurate, the
+    representation \textbf{encodes this feature} and the decisions may be affected by it.
+  \item \textbf{Annotate a few frames from the failing club.} The system is a pipeline, so
+    the most direct test is to label a few hundred frames there and measure the two stages
+    separately: first the pose estimation on its own, and then the hit detection fed with those
+    ground-truth keypoints instead of the predicted ones. If the pose is already wrong, the
+    problem is in the perception stage. If the pose is fine and the hits are still wrong, the
+    problem is in what consumes it.
+\end{itemize}
+
+\section*{Q2. Impact of inconsistent annotations and label-quality strategy}
+
+\subsection*{Impact on the model}
+
+If annotators label differently, the model has \textbf{no way of knowing} whether the elbow
+should go slightly higher or lower: it depends only on the annotator, and we give the model
+no information about \textbf{who labelled what}. To minimise the loss it will predict what
+the \textbf{average annotator} considers correct, but it can also pick up \textbf{spurious
+correlations} that make predictions unreliable. The same happens with the
+\textbf{timestamps}: label quality has a \textbf{direct impact} on performance, and with
+random noise as labels the model would learn nothing useful. \textbf{Hit classification} is
+affected too, since the hit type is probably inferred from wrist and elbow relative to the
+racket at the moment of contact, and how much will depend on the \textbf{architectural
+choices}.
+Disagreement between annotators also sets a \textbf{noise floor}: the model cannot be more
+consistent than the people who labelled the data, so measuring how much they disagree tells us
+when it stops being worth improving the model and we should improve the labels instead.
+
+\subsection*{How to detect it, and what to do}
+
+Everything depends on whether we \textbf{know who annotated what} (for example, one folder
+or file naming per annotator).
+
+\begin{itemize}
+  \item \textbf{If we know it}, we can look for systematic differences, e.g.\ the
+    \textbf{average forearm length}. An annotator who places the wrist in the middle of the
+    hand gives a consistent offset in every clip, so we can not only detect the bias but
+    \textbf{correct it}, shortening the elbow-to-wrist vector by that amount. Same for timestamps:
+    if one annotator always marks the hit with the ball at distance $x$ from the racket and
+    another at distance $y$, that is again a correctable bias.
+  \item \textbf{If we do not know it}, it gets more complicated. Then the decision depends on
+    how \textbf{bad} the annotations are, how \textbf{expensive} relabelling would be, and how
+    much performance drops if we simply \textbf{filter those parts out} (an \textbf{ablation
+    run} makes sense here).
+\end{itemize}
+
+\textbf{Reweighting} adds complexity and possible \textbf{over-engineering} (you have to
+choose a weight per partition), so I would not go there until everything else is exhausted.
+I would also watch \textbf{sub-metrics for smashes} and check whether (1) overall precision
+and (2) smash precision improve or get worse.
+
+\section*{Q3. Handling rare but important smash events}
+
+\subsection*{First, without retraining}
+
+The cheapest thing is to experiment with the \textbf{decision threshold}: lowering it raises
+recall on rare cases \textbf{with no retraining}, and the model may already know more about
+smashes than the \textbf{argmax} suggests. The trade off is \textbf{more recall, less
+precision} on smashes. If this is not enough, we retrain and modify the dataset or the loss.
+
+\subsection*{The dataset}
+
+If smashes are very rare, the model can reach a very good training loss \textbf{without ever
+fitting them}. Augmenting them makes the model see these cases more often and \textbf{forces
+it to fit this hit type}:
+
+\begin{itemize}
+  \item \textbf{Oversampling} (repeating clips): no new information, only more gradient
+    weight, and it multiplies the risk of \textbf{memorising those clips}.
+  \item \textbf{Augmentation}: mirroring, cropping / scaling, adding noise, etc.
+  \item \textbf{Acquiring real smashes}: this is the \textbf{best solution}, since it is
+    the only one adding \textbf{real new information} (and it lets me go play padel). A
+    cheap way to get them from footage we already have is to run the current model with a
+    \textbf{deliberately low smash threshold}, so it over-predicts smashes, and send only those
+    candidate windows to be checked and annotated. The annotators then spend their time on
+    smashes instead of on the footage that contains none. If we do not have any extra footage:
+    book a padel court, practise smashes with friends, record them and add them to the dataset.
+    I offer myself as a volunteer for the job :).
+\end{itemize}
+
+We can also update the \textbf{loss} so that a missed smash is \textbf{penalised more
+heavily}.
+
+\subsection*{Evaluation}
+
+Here I would be \textbf{more careful}, because any change makes the results \textbf{not
+comparable} with other versions of the model.
+
+\begin{itemize}
+  \item If validation already has \textbf{enough smashes} and they are correctly labelled,
+    \textbf{leave it as it is}.
+  \item If there are too few, the conclusions may not be \textbf{statistically significant}.
+    In that case I would add smashes to validation as well, but only by \textbf{acquiring real
+    ones},
+    never by oversampling or augmentation. Loss results would not be comparable anymore.
+  \item Keeping evaluation \textbf{untouched} is what lets me tell whether the training
+    changes are real or just \textbf{overfitting artifacts}: the same augmentation on both
+    sides could make me believe the model improved when it is only overfitting.
+\end{itemize}
+
+\subsection*{Trade-offs}
+
+Weighting smashes too heavily will probably \textbf{degrade the other hit types}, so how much
+to weight them depends on \textbf{how important they are for the product}. Augmentation costs
+\textbf{training time} and changing the loss can add \textbf{instability}. If training time is
+not a bottleneck, I would go with \textbf{augmenting the dataset}.
+
+\section*{Q4. Stable-but-less-accurate vs.\ accurate-but-jittery model}
+
+If two runs give noticeably different results, I would first train \textbf{more models with
+different seeds}, check that they \textbf{converged properly} and understand what randomness
+produced this.
+
+For production I would \textbf{ship the stable one}: it is easier to justify a model with
+lower precision than one that from time to time gives a completely \textbf{unpredictable
+response}. It depends of course on how much precision we lose and how often the nonsense
+happens, but for a product a \textbf{predictable model is better}, because you have to know
+what you are selling and be able to speak for it when it makes mistakes.
+
+For development I am \textbf{more interested in the jittery model}:
+
+\begin{itemize}
+  \item Which scenarios \textbf{break} it, and when exactly it produces inconsistent timing or
+    jittery keypoints.
+  \item Are those jitters \textbf{justified}? If they are (the ball is not visible, it is
+    occluded, or similar), that would \textbf{change my decision} between the two models.
+  \item How do we even measure the jitter? \textbf{Per-frame keypoint error cannot see it},
+    because it compares every frame with its ground truth independently, so a model whose
+    predictions oscillate between consecutive frames can still look better on average. To see it
+    we have to compare each frame \textbf{with the previous timesteps}: displacement and jerk
+    between consecutive frames, especially in segments where the player is almost still and the
+    real movement should be close to zero.
+  \item Can they be removed in \textbf{postprocessing}? A person moves smoothly and cannot be
+    ``teleported'', so keypoints that jump can be identified as \textbf{noise} and filtered
+    out.
+\end{itemize}
+
+\section*{Q5. Proposed model for this application}
+
+I would split the architecture into \textbf{four different problems}:
+
+\begin{enumerate}
+  \item \textbf{Pose estimation of the players.} An \textbf{off-the-shelf model}
+    (\href{https://arxiv.org/abs/2312.07526}{RTMO} or
+    \href{https://huggingface.co/Ultralytics/YOLO26}{YOLO26-pose}), evaluated to see how it
+    performs and whether \textbf{fine-tuning} is needed,
+    plus lightweight \textbf{multi-person tracking} so keypoints carry a stable identity.
+    I would lean towards RTMO because it is \textbf{one-stage}: it finds all the
+    keypoints in the image in a single forward pass, so its
+    cost does not depend on how many people are in the frame. A classic \textbf{top-down}
+    model works the other way around, because it first detects each person and then runs a
+    separate pose network on every crop. With four players on a padel court that means running
+    the pose network four times per frame.
+  \item \textbf{Ball tracking.} It probably needs a \textbf{higher frequency} than the pose
+    estimation, or a couple of frames at a time, since the ball is a \textbf{tiny object}
+    moving much faster. I would take a model \textbf{pretrained on tennis} or a similar sport
+    and fine-tune it for padel.
+  \item \textbf{Racket tracking.} Same approach, pretrained plus fine-tuning. I am \textbf{not
+    sure it is necessary}, so I would first evaluate whether the racket can be inferred
+    accurately enough from the \textbf{hand position}.
+  \item \textbf{Hit classifier.} Trained on the \textbf{outputs of the previous stages}
+    (poses, ball and racket positions), a \textbf{tiny ML model} is enough to determine the
+    hit type, and it can be \textbf{image agnostic}.
+\end{enumerate}
+
+For 1, 2 and 3 I would pick models that run \textbf{fast on CPU}, ideally with no GPU at all,
+which is why I would prefer a \textbf{CNN backbone} over a transformer one: vision
+transformers are \textbf{less CPU friendly}. The main issue would probably be
+\textbf{licensing}: checking which models we are allowed to use.
+
+\end{document}
